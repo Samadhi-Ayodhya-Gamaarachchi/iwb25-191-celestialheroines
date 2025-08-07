@@ -23,7 +23,7 @@ For NGO/Admin
 🧰 Tech Stack
 
 
- Flutter             
+ React-Native+tailwind css             
  Ballerina           
  MongoDB             
 
