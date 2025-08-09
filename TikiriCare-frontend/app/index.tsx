@@ -1,10 +1,11 @@
-import { Text, View } from 'react-native';
-import "../global.css"
+// app/_layout.tsx (Root layout)
+import { Stack } from 'expo-router';
+import "../global.css";
 
-export default function App() {
+export default function RootLayout() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-5xl font-bold">Hello NativeWind!</Text>
-    </View>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }
