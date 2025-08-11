@@ -81,6 +81,18 @@ export default function TabLayout() {
           href: null, // This hides the tab
         }} 
       />
+      <Tabs.Screen 
+        name="Add_child" 
+        options={{ 
+          href: null, // This hides the tab
+        }} 
+      />
+      <Tabs.Screen 
+        name="EditProfile_Parent" 
+        options={{ 
+          href: null, // This hides the tab
+        }} 
+      />
     </Tabs>
   );
 }
