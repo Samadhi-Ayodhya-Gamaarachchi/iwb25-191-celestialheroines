@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
   addChildButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#28A745',
+    backgroundColor: '#3b82f6',
     paddingHorizontal: 15,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 10,
   },
   addChildText: {
     marginLeft: 5,

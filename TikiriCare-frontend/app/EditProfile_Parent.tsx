@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#28A745',
+    backgroundColor: '#3b82f6',
     padding: 15,
     borderRadius: 10,
     justifyContent: 'center',
