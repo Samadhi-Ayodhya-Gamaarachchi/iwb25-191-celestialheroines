@@ -5,18 +5,24 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.10.0"
+distribution-version = "2201.12.7"
+
+[[package]]
+org = "ballerina"
+name = "crypto"
+version = "2.9.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "time"}
+]
 
 [[package]]
 org = "ballerina"
 name = "io"
-version = "1.6.3"
+version = "1.8.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
-]
-modules = [
-	{org = "ballerina", packageName = "io", moduleName = "io"}
 ]
 
 [[package]]
@@ -34,8 +40,27 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "log"
+version = "2.12.0"
+dependencies = [
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.value"},
+	{org = "ballerina", name = "observe"}
+]
+
+[[package]]
+org = "ballerina"
 name = "observe"
-version = "1.3.0"
+version = "1.5.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+
+[[package]]
+org = "ballerina"
+name = "time"
+version = "2.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -53,12 +78,25 @@ modules = [
 ]
 
 [[package]]
+org = "ballerinax"
+name = "mongodb"
+version = "5.1.0"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "log"}
+]
+modules = [
+	{org = "ballerinax", packageName = "mongodb", moduleName = "mongodb"}
+]
+
+[[package]]
 org = "user"
 name = "TikiriCare_backend"
 version = "0.1.0"
 dependencies = [
-	{org = "ballerina", name = "io"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerinai", name = "observe"},
+	{org = "ballerinax", name = "mongodb"}
 ]
 modules = [
 	{org = "user", packageName = "TikiriCare_backend", moduleName = "TikiriCare_backend"}
