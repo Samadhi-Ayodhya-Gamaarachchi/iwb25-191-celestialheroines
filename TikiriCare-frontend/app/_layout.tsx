@@ -7,7 +7,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={({ route }) => ({
-        tabBarActiveTintColor: '#4CAF50',
+        tabBarActiveTintColor: '#1E90FF',
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: { 
           backgroundColor: '#fff', 
@@ -77,6 +77,18 @@ export default function TabLayout() {
       {/* Hide the HomeScreen tab since we're using index */}
       <Tabs.Screen 
         name="index" 
+        options={{ 
+          href: null, // This hides the tab
+        }} 
+      />
+      <Tabs.Screen 
+        name="Add_child" 
+        options={{ 
+          href: null, // This hides the tab
+        }} 
+      />
+      <Tabs.Screen 
+        name="EditProfile_Parent" 
         options={{ 
           href: null, // This hides the tab
         }} 

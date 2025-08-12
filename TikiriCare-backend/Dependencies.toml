@@ -15,6 +15,16 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
 ]
+distribution-version = "2201.12.7"
+
+[[package]]
+org = "ballerina"
+name = "crypto"
+version = "2.9.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "time"}
+]
 
 [[package]]
 org = "ballerina"
@@ -95,6 +105,7 @@ org = "user"
 name = "TikiriCare_backend"
 version = "0.1.0"
 dependencies = [
+	{org = "ballerina", name = "io"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "mongodb"}
 ]
