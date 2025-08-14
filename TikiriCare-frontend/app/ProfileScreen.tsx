@@ -1,5 +1,5 @@
 // app/(tabs)/ProfileScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -8,31 +8,15 @@ import { useRouter } from 'expo-router';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { ProfileCard } from '../components/Profile/ProfileCard';
 import { NavigationTabs } from '../components/Profile/NavigationTab';
-import { ChildrenSection } from '../components/Profile/ChildrenSection';
 import { SettingsModal } from '../components/Profile/SettingsModel';
 import { HelpModal } from '../components/Profile/HelpModel';
-import { Child } from '../components/Profile/ChildCard';
+
+// Import context and updated components
+import { useChild } from '../context/ChildContext';
+import { ChildrenSection } from '../components/Profile/ChildrenSection';
 
 export default function ProfileScreen() {
-  const [children, setChildren] = useState<Child[]>([
-    {
-      id: 1,
-      name: 'Malith Fernando',
-      age: '2 years 3 months',
-      gender: 'Male',
-      avatar: 'M',
-      color: '#4A90E2',
-    },
-    {
-      id: 2,
-      name: 'Amaya Fernando',
-      age: '6 months',
-      gender: 'Female',
-      avatar: 'A',
-      color: '#E94B7D',
-    },
-  ]);
-
+  const { children, selectedChild } = useChild();
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [helpVisible, setHelpVisible] = useState(false);
   const router = useRouter();
@@ -46,8 +30,31 @@ export default function ProfileScreen() {
   };
 
   const handleChildPress = (childName: string) => {
-    Alert.alert('Child Details', `View details for ${childName}`);
+    // Show confirmation or navigate to home
+    Alert.alert(
+      'Child Selected', 
+      `${childName} is now selected. You can view their health information on the Home screen.`,
+      [
+        {
+          text: 'OK',
+          style: 'default',
+        },
+        {
+          text: 'Go to Home',
+          onPress: () => router.push('/HomeScreen'),
+          style: 'default',
+        }
+      ]
+    );
   };
+
+  // Show selected child info when component mounts or selectedChild changes
+  useEffect(() => {
+    if (selectedChild) {
+      // You can add any logic here when selectedChild changes
+      // Remove the Alert.alert from the JSX as it's not valid there
+    }
+  }, [selectedChild]);
 
   const tabs = [
     {
@@ -81,8 +88,8 @@ export default function ProfileScreen() {
 
         <NavigationTabs tabs={tabs} activeTabId="children" />
 
+        {/* Use the updated ChildrenSection that works with context */}
         <ChildrenSection
-          children={children}
           onAddChild={handleAddChild}
           onChildPress={handleChildPress}
         />
