@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Alert } from 'react-native';
+import { ScrollView, View, Alert, Text } from 'react-native';
 import HeaderSection from '../components/Home/Header';
 import ChildInfoCard from '../components/Home/ChildInfo';
 import DevelopmentProgress from '../components/Home/DevelopmentProgress';
 import UpcomingVaccines from '../components/Home/UpcommingVac';
 import CareTips from '../components/Home/CareTips';
 import QuickActions from '../components/Home/QuickActions';
+import { useChild } from '../context/ChildContext';
 
 import { 
   ChildData, 
@@ -16,79 +17,193 @@ import {
 } from '../components/Home/HomeType';
 
 const HealthTrackerHome: React.FC = () => {
+  const { selectedChild } = useChild();
   const [currentTipIndex, setCurrentTipIndex] = useState<number>(0);
 
+  // If no child is selected, show a message
+  if (!selectedChild) {
+    return (
+      <ScrollView className="bg-gray-50 min-h-full max-w-md mx-auto">
+        <View className="px-5 py-8 items-center justify-center min-h-screen">
+          <Text className="text-xl font-semibold text-gray-700 text-center mb-4">
+            No Child Selected
+          </Text>
+          <Text className="text-base text-gray-600 text-center">
+            Please select a child from your profile to view their health information.
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  // Use selected child's data
   const childData: ChildData = {
-    name: 'Malith',
-    age: '2y 3m',
-    lastCheckup: 'July 25, 2025',
-    height: 89,
-    weight: 12.5,
-    bmi: 15.8,
-    developmentScore: 85
+    name: selectedChild.name,
+    age: selectedChild.age,
+    lastCheckup: selectedChild.lastCheckup || 'Not scheduled',
+    height: selectedChild.height || 0,
+    weight: selectedChild.weight || 0,
+    bmi: selectedChild.bmi || 0,
+    developmentScore: selectedChild.developmentScore || 0
   };
 
-  const developmentMilestones: DevelopmentMilestone[] = [
-    { category: 'Physical', progress: 90, color: 'green-500', emoji: '🏃' },
-    { category: 'Cognitive', progress: 85, color: 'purple-500', emoji: '🧠' },
-    { category: 'Language', progress: 80, color: 'cyan-500', emoji: '🗣️' },
-    { category: 'Social', progress: 88, color: 'amber-500', emoji: '👫' }
-  ];
+  // Generate age-appropriate development milestones
+  const getAgeMilestones = (age: string): DevelopmentMilestone[] => {
+    const ageMatch = age.match(/(\d+)y/);
+    const years = ageMatch ? parseInt(ageMatch[1]) : 2;
 
-  const upcomingVaccines: Vaccine[] = [
-    {
-      id: 1,
-      name: 'MMR (2nd Dose)',
-      dueDate: 'Tomorrow',
-      urgent: true,
-      emoji: '💉'
-    },
-    {
-      id: 2,
-      name: 'DTP Booster',
-      dueDate: 'In 3 months',
-      urgent: false,
-      emoji: '🏥'
+    if (years <= 2) {
+      return [
+        { category: 'Physical', progress: 85, color: 'green-500', emoji: '🚶' },
+        { category: 'Cognitive', progress: selectedChild.developmentScore || 80, color: 'purple-500', emoji: '🧠' },
+        { category: 'Language', progress: 75, color: 'cyan-500', emoji: '🗣️' },
+        { category: 'Social', progress: 82, color: 'amber-500', emoji: '👶' }
+      ];
+    } else if (years <= 4) {
+      return [
+        { category: 'Physical', progress: 90, color: 'green-500', emoji: '🏃' },
+        { category: 'Cognitive', progress: selectedChild.developmentScore || 85, color: 'purple-500', emoji: '🧠' },
+        { category: 'Language', progress: 88, color: 'cyan-500', emoji: '🗣️' },
+        { category: 'Social', progress: 92, color: 'amber-500', emoji: '👫' }
+      ];
+    } else {
+      return [
+        { category: 'Physical', progress: 93, color: 'green-500', emoji: '⚽' },
+        { category: 'Cognitive', progress: selectedChild.developmentScore || 90, color: 'purple-500', emoji: '🧠' },
+        { category: 'Language', progress: 95, color: 'cyan-500', emoji: '📚' },
+        { category: 'Social', progress: 90, color: 'amber-500', emoji: '🤝' }
+      ];
     }
-  ];
+  };
 
-  const careTips: CareTip[] = [
-    {
-      id: 1,
-      title: 'Language Development',
-      tip: 'Read stories together daily. At 2y 3m, children should know 50+ words and start combining them.',
-      emoji: '📚',
-      category: 'Development'
-    },
-    {
-      id: 2,
-      title: 'Nutrition Focus',
-      tip: 'Offer variety of foods. Toddlers need calcium for bone growth - include dairy, leafy greens.',
-      emoji: '🥛',
-      category: 'Nutrition'
-    },
-    {
-      id: 3,
-      title: 'Sleep Schedule',
-      tip: 'Maintain 11-14 hours total sleep. Consistent bedtime routine helps brain development.',
-      emoji: '😴',
-      category: 'Sleep'
-    },
-    {
-      id: 4,
-      title: 'Physical Activity',
-      tip: 'Encourage running, jumping, climbing. Physical play develops motor skills and coordination.',
-      emoji: '⚽',
-      category: 'Activity'
-    },
-    {
-      id: 5,
-      title: 'Social Skills',
-      tip: 'Arrange playdates with other children. This age learns sharing and taking turns.',
-      emoji: '👶',
-      category: 'Social'
+  // Generate age-appropriate vaccines
+  const getAgeVaccines = (age: string): Vaccine[] => {
+    const ageMatch = age.match(/(\d+)y/);
+    const years = ageMatch ? parseInt(ageMatch[1]) : 2;
+
+    if (years <= 2) {
+      return [
+        {
+          id: 1,
+          name: 'MMR (1st Dose)',
+          dueDate: 'Due Next Week',
+          urgent: true,
+          emoji: '💉'
+        },
+        {
+          id: 2,
+          name: 'DTP Series',
+          dueDate: 'In 2 months',
+          urgent: false,
+          emoji: '🏥'
+        }
+      ];
+    } else if (years <= 4) {
+      return [
+        {
+          id: 1,
+          name: 'MMR (2nd Dose)',
+          dueDate: 'Tomorrow',
+          urgent: true,
+          emoji: '💉'
+        },
+        {
+          id: 2,
+          name: 'DTP Booster',
+          dueDate: 'In 3 months',
+          urgent: false,
+          emoji: '🏥'
+        }
+      ];
+    } else {
+      return [
+        {
+          id: 1,
+          name: 'School Entry Vaccines',
+          dueDate: 'Before School Starts',
+          urgent: true,
+          emoji: '🎒'
+        }
+      ];
     }
-  ];
+  };
+
+  // Generate age-appropriate care tips
+  const getAgeTips = (age: string): CareTip[] => {
+    const ageMatch = age.match(/(\d+)y/);
+    const years = ageMatch ? parseInt(ageMatch[1]) : 2;
+
+    if (years <= 2) {
+      return [
+        {
+          id: 1,
+          title: 'Language Development',
+          tip: `At ${age}, children should know 50+ words and start combining them. Read stories together daily.`,
+          emoji: '📚',
+          category: 'Development'
+        },
+        {
+          id: 2,
+          title: 'Nutrition Focus',
+          tip: 'Offer variety of foods. Toddlers need calcium for bone growth - include dairy, leafy greens.',
+          emoji: '🥛',
+          category: 'Nutrition'
+        },
+        {
+          id: 3,
+          title: 'Sleep Schedule',
+          tip: 'Maintain 11-14 hours total sleep. Consistent bedtime routine helps brain development.',
+          emoji: '😴',
+          category: 'Sleep'
+        }
+      ];
+    } else if (years <= 4) {
+      return [
+        {
+          id: 1,
+          title: 'Preschool Skills',
+          tip: `At ${age}, focus on counting, colors, and shapes. Encourage independent play and creativity.`,
+          emoji: '🎨',
+          category: 'Development'
+        },
+        {
+          id: 2,
+          title: 'Social Development',
+          tip: 'Arrange playdates and teach sharing. This age learns cooperation and friendship.',
+          emoji: '👫',
+          category: 'Social'
+        },
+        {
+          id: 3,
+          title: 'Physical Activity',
+          tip: 'Encourage running, jumping, and ball games. Develop gross motor skills through active play.',
+          emoji: '⚽',
+          category: 'Activity'
+        }
+      ];
+    } else {
+      return [
+        {
+          id: 1,
+          title: 'School Readiness',
+          tip: `At ${age}, practice writing letters and numbers. Read together to improve vocabulary and comprehension.`,
+          emoji: '✏️',
+          category: 'Development'
+        },
+        {
+          id: 2,
+          title: 'Independence',
+          tip: 'Encourage self-care tasks like dressing, brushing teeth, and simple chores independently.',
+          emoji: '🦷',
+          category: 'Self-care'
+        }
+      ];
+    }
+  };
+
+  const developmentMilestones = getAgeMilestones(selectedChild.age);
+  const upcomingVaccines = getAgeVaccines(selectedChild.age);
+  const careTips = getAgeTips(selectedChild.age);
 
   const summaryData: SummaryItem[] = [
     { emoji: '💧', label: 'Water', value: '6/8 cups' },
@@ -106,15 +221,15 @@ const HealthTrackerHome: React.FC = () => {
   };
 
   const handleLogGrowth = (): void => {
-    Alert.alert('Log Growth', 'Navigate to growth tracking screen');
+    Alert.alert('Log Growth', `Navigate to growth tracking screen for ${selectedChild.name}`);
   };
 
   const handleAddMedicine = (): void => {
-    Alert.alert('Add Medicine', 'Navigate to medicine management screen');
+    Alert.alert('Add Medicine', `Navigate to medicine management screen for ${selectedChild.name}`);
   };
 
   const handleBookCheckup = (): void => {
-    Alert.alert('Book Checkup', 'Navigate to appointment booking screen');
+    Alert.alert('Book Checkup', `Navigate to appointment booking screen for ${selectedChild.name}`);
   };
 
   return (
@@ -143,8 +258,6 @@ const HealthTrackerHome: React.FC = () => {
           onAddMedicine={handleAddMedicine}
           onBookCheckup={handleBookCheckup}
         />
-        
-        
       </View>
     </ScrollView>
   );

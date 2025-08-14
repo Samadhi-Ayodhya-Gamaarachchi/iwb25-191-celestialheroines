@@ -2,9 +2,11 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ChildProvider } from '@/context/ChildContext';
 
 export default function TabLayout() {
   return (
+    <ChildProvider>
     <Tabs
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: '#1E90FF',
@@ -46,11 +48,12 @@ export default function TabLayout() {
       })}
     >
       {/* Only include the screens you actually have */}
-      <Tabs.Screen 
-        name="HomeScreen" 
-        options={{ 
-          title: 'Home',
-          tabBarLabel: 'Home',
+      
+        <Tabs.Screen 
+          name="HomeScreen" 
+          options={{ 
+            title: 'Home',
+            tabBarLabel: 'Home',
         }} 
       />
       <Tabs.Screen 
@@ -94,5 +97,6 @@ export default function TabLayout() {
         }} 
       />
     </Tabs>
+    </ChildProvider>
   );
 }
