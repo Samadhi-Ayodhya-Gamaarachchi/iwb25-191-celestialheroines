@@ -51,9 +51,6 @@ const CareCenterCard: React.FC<CareCenterCardProps> = ({
           className="w-full h-48"
           defaultSource={require('../../assets/images/react-logo.png')}
         />
-        <View className="absolute top-3 right-3 bg-white/90 rounded-full px-3 py-1">
-          <Text className="text-yellow-600 font-bold">⭐ {caregiver.rating}</Text>
-        </View>
         <LinearGradient
           colors={['transparent', 'rgba(0,0,0,0.7)']}
           className="absolute bottom-0 left-0 right-0 h-20"

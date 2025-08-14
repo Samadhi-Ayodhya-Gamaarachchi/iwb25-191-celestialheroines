@@ -29,7 +29,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             placeholderTextColor="#9ca3af"
           />
         </View>
-        
+
         <View className="bg-white rounded-xl shadow-sm">
           <TextInput
             placeholder="📍 Search by location..."
@@ -43,26 +43,15 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
       {/* Filter Options */}
       <View className="flex-row justify-between mt-4">
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={onFilterPress}
-          className="bg-blue-500 rounded-xl px-6 py-3 shadow-sm"
+          className="ml-auto bg-teal-500 rounded-xl px-6 py-3 shadow-sm"
         >
           <Text className="text-white font-semibold text-center">
             🔽 Filters
           </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity className="bg-green-500 rounded-xl px-6 py-3 shadow-sm">
-          <Text className="text-white font-semibold text-center">
-            📍 Near Me
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity className="bg-purple-500 rounded-xl px-6 py-3 shadow-sm">
-          <Text className="text-white font-semibold text-center">
-            ⭐ Top Rated
-          </Text>
-        </TouchableOpacity>
+
       </View>
     </View>
   );

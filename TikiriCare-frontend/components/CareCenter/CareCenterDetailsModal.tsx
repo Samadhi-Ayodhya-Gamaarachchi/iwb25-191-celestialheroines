@@ -47,9 +47,6 @@ const CareCenterDetailsModal: React.FC<CareCenterDetailsModalProps> = ({
               className="w-full h-64"
               defaultSource={require('../../assets/images/react-logo.png')}
             />
-            <View className="absolute top-4 right-4 bg-white/90 rounded-full px-3 py-2">
-              <Text className="text-yellow-600 font-bold">⭐ {caregiver.rating}</Text>
-            </View>
           </View>
 
           {/* Main Info */}

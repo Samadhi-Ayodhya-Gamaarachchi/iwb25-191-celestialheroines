@@ -10,17 +10,7 @@ distribution-version = "2201.12.7"
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.9.0"
-dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "time"}
-]
-distribution-version = "2201.12.7"
-
-[[package]]
-org = "ballerina"
-name = "crypto"
-version = "2.9.0"
+version = "2.8.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -33,6 +23,9 @@ version = "1.8.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
+]
+modules = [
+	{org = "ballerina", packageName = "io", moduleName = "io"}
 ]
 
 [[package]]
@@ -51,7 +44,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "log"
-version = "2.12.0"
+version = "2.9.0"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -70,7 +63,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "time"
-version = "2.7.0"
+version = "2.6.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]

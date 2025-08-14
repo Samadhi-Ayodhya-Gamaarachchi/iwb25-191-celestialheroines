@@ -14,14 +14,14 @@ import caregiversData from "../assets/caregivers.json";
 // Import new components
 import CareCenterHeader from "../components/CareCenter/CareCenterHeader";
 import SearchFilters from "../components/CareCenter/SearchFilters";
-import QuickStats from "../components/CareCenter/QuickStats";
 import CareCenterCard from "../components/CareCenter/CareCenterCard";
 import CareCenterDetailsModal from "../components/CareCenter/CareCenterDetailsModal";
 
 export default function CareCenterScreen() {
   const [searchName, setSearchName] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
-  const [bookings, setBookings] = useState<Record<string, string>>({});
+  // Only allow one booking at a time
+  const [bookedCenterId, setBookedCenterId] = useState<string | null>(null);
   const [selectedCaregiver, setSelectedCaregiver] = useState<Caregiver | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -40,6 +40,14 @@ export default function CareCenterScreen() {
 
   // Handle booking
   const handleBooking = (id: string) => {
+    if (bookedCenterId && bookedCenterId !== id) {
+      Alert.alert(
+        "Booking Limit",
+        "You can only book one care center at a time. Please cancel your existing booking to book another.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
     const center = filteredCaregivers.find(c => c.id === id);
     Alert.alert(
       "Confirm Booking",
@@ -49,7 +57,7 @@ export default function CareCenterScreen() {
         { 
           text: "Book Now", 
           onPress: () => {
-            setBookings((prev) => ({ ...prev, [id]: "pending" }));
+            setBookedCenterId(id);
             Alert.alert("Success", "Booking request sent! You'll receive a confirmation soon.");
           }
         }
@@ -80,7 +88,12 @@ export default function CareCenterScreen() {
 
   // Render individual care center card
   const renderCaregiver = ({ item }: { item: Caregiver }) => {
-    const bookingStatus = bookings[item.id] || item.status;
+    let bookingStatus = item.status;
+    if (bookedCenterId) {
+      if (bookedCenterId === item.id) {
+        bookingStatus = "pending";
+      } 
+    }
     return (
       <CareCenterCard
         caregiver={item}
@@ -114,14 +127,6 @@ export default function CareCenterScreen() {
             availableSlots={totalSlots}
           />
         </View>
-
-        {/* Quick Stats */}
-        <QuickStats
-          totalCenters={filteredCaregivers.length}
-          availableSlots={totalSlots}
-          nearbyCount={nearbyCount}
-          averageRating={averageRating}
-        />
 
         {/* Search Filters */}
         <View className="px-4">
