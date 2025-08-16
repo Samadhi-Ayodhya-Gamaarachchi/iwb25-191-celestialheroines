@@ -9,6 +9,7 @@ import {
   RefreshControl 
 } from "react-native";
 import { Caregiver } from "../types/Caregiver";
+import { useChild } from "../context/ChildContext"; // Import the context
 import caregiversData from "../assets/caregivers.json";
 
 // Import new components
@@ -18,6 +19,9 @@ import CareCenterCard from "../components/CareCenter/CareCenterCard";
 import CareCenterDetailsModal from "../components/CareCenter/CareCenterDetailsModal";
 
 export default function CareCenterScreen() {
+  // Get child context
+  const { selectedChild, children } = useChild();
+  
   const [searchName, setSearchName] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   // Only allow one booking at a time
@@ -38,8 +42,18 @@ export default function CareCenterScreen() {
   const nearbyCount = filteredCaregivers.filter(c => c.location.toLowerCase().includes("colombo")).length;
   const averageRating = filteredCaregivers.reduce((sum, center) => sum + center.rating, 0) / filteredCaregivers.length || 0;
 
-  // Handle booking
+  // Handle booking with child validation
   const handleBooking = (id: string) => {
+    // Check if a child is selected
+    if (!selectedChild) {
+      Alert.alert(
+        "No Child Selected",
+        "Please select a child from your profile to book a care center.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
     if (bookedCenterId && bookedCenterId !== id) {
       Alert.alert(
         "Booking Limit",
@@ -48,17 +62,21 @@ export default function CareCenterScreen() {
       );
       return;
     }
+
     const center = filteredCaregivers.find(c => c.id === id);
     Alert.alert(
       "Confirm Booking",
-      `Would you like to book a slot at ${center?.name}?`,
+      `Would you like to book a slot at ${center?.name} for ${selectedChild.name}?`,
       [
         { text: "Cancel", style: "cancel" },
         { 
           text: "Book Now", 
           onPress: () => {
             setBookedCenterId(id);
-            Alert.alert("Success", "Booking request sent! You'll receive a confirmation soon.");
+            Alert.alert(
+              "Success", 
+              `Booking request sent for ${selectedChild.name}! You'll receive a confirmation soon.`
+            );
           }
         }
       ]
@@ -98,6 +116,7 @@ export default function CareCenterScreen() {
       <CareCenterCard
         caregiver={item}
         bookingStatus={bookingStatus}
+        selectedChild={selectedChild}
         onBooking={handleBooking}
         onViewDetails={handleViewDetails}
       />
@@ -115,6 +134,17 @@ export default function CareCenterScreen() {
     </View>
   );
 
+  // No child selected state
+  const NoChildSelectedState = () => (
+    <View className="flex-1 justify-center items-center py-20">
+      <Text className="text-6xl mb-4">👶</Text>
+      <Text className="text-xl font-bold text-gray-800 mb-2">No Child Selected</Text>
+      <Text className="text-gray-600 text-center px-8">
+        Please select a child from your profile to view and book care centers.
+      </Text>
+    </View>
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor="#3b82f6" />
@@ -127,6 +157,28 @@ export default function CareCenterScreen() {
             availableSlots={totalSlots}
           />
         </View>
+
+        {/* Show selected child info */}
+        {selectedChild && (
+          <View className="px-4 mb-2">
+            <View className="bg-blue-50 rounded-lg p-3 flex-row items-center">
+              <View 
+                className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                style={{ backgroundColor: selectedChild.color }}
+              >
+                <Text className="text-white font-bold text-lg">
+                  {selectedChild.avatar}
+                </Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-sm text-gray-600">Booking for:</Text>
+                <Text className="font-semibold text-gray-800">
+                  {selectedChild.name} ({selectedChild.age})
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Search Filters */}
         <View className="px-4">
@@ -156,31 +208,38 @@ export default function CareCenterScreen() {
           ) : null}
         </View>
 
-        {/* Care Centers List */}
-        <FlatList
-          data={filteredCaregivers}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCaregiver}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          ListEmptyComponent={EmptyState}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={['#3b82f6']}
-              tintColor="#3b82f6"
+        {/* Conditional Content */}
+        {!selectedChild ? (
+          <NoChildSelectedState />
+        ) : (
+          <>
+            {/* Care Centers List */}
+            <FlatList
+              data={filteredCaregivers}
+              keyExtractor={(item) => item.id}
+              renderItem={renderCaregiver}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              ListEmptyComponent={EmptyState}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={['#3b82f6']}
+                  tintColor="#3b82f6"
+                />
+              }
+              showsVerticalScrollIndicator={false}
             />
-          }
-          showsVerticalScrollIndicator={false}
-        />
 
-        {/* Details Modal */}
-        <CareCenterDetailsModal
-          visible={isModalVisible}
-          caregiver={selectedCaregiver}
-          onClose={() => setIsModalVisible(false)}
-          onBook={handleBooking}
-        />
+            {/* Details Modal */}
+            <CareCenterDetailsModal
+              visible={isModalVisible}
+              caregiver={selectedCaregiver}
+              onClose={() => setIsModalVisible(false)}
+              onBook={handleBooking}
+            />
+          </>
+        )}
       </View>
     </SafeAreaView>
   );

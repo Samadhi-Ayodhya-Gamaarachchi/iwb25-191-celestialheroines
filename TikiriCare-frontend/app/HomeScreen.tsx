@@ -6,6 +6,7 @@ import DevelopmentProgress from '../components/Home/DevelopmentProgress';
 import UpcomingVaccines from '../components/Home/UpcommingVac';
 import CareTips from '../components/Home/CareTips';
 import QuickActions from '../components/Home/QuickActions';
+import AddGrowthModal from '../components/Home/AddGrowth'; // Import the modal
 import { useChild } from '../context/ChildContext';
 
 import { 
@@ -19,6 +20,7 @@ import {
 const HealthTrackerHome: React.FC = () => {
   const { selectedChild } = useChild();
   const [currentTipIndex, setCurrentTipIndex] = useState<number>(0);
+  const [showGrowthModal, setShowGrowthModal] = useState<boolean>(false); // Add modal state
 
   // If no child is selected, show a message
   if (!selectedChild) {
@@ -220,8 +222,9 @@ const HealthTrackerHome: React.FC = () => {
     setCurrentTipIndex((prev) => (prev - 1 + careTips.length) % careTips.length);
   };
 
+  // Updated to open modal instead of showing alert
   const handleLogGrowth = (): void => {
-    Alert.alert('Log Growth', `Navigate to growth tracking screen for ${selectedChild.name}`);
+    setShowGrowthModal(true);
   };
 
   const handleAddMedicine = (): void => {
@@ -233,33 +236,37 @@ const HealthTrackerHome: React.FC = () => {
   };
 
   return (
-    <ScrollView className="bg-gray-50 min-h-full max-w-md mx-auto">
-      <HeaderSection childName={childData.name} />
-      
-      <View className="px-5 pb-8">
-        <ChildInfoCard childData={childData} />
+    <>
+      <ScrollView className="bg-gray-50 min-h-full max-w-md mx-auto">
+        <HeaderSection childName={childData.name} />
         
-        <DevelopmentProgress 
-          milestones={developmentMilestones} 
-          developmentScore={childData.developmentScore} 
-        />
-        
-        <UpcomingVaccines vaccines={upcomingVaccines} />
-        
-        <CareTips 
-          careTips={careTips}
-          currentTipIndex={currentTipIndex}
-          onNext={nextTip}
-          onPrevious={prevTip}
-        />
-        
-        <QuickActions 
-          onLogGrowth={handleLogGrowth}
-          onAddMedicine={handleAddMedicine}
-          onBookCheckup={handleBookCheckup}
-        />
-      </View>
-    </ScrollView>
+        <View className="px-5 pb-8">
+          <ChildInfoCard childData={childData} />
+          <QuickActions 
+            onLogGrowth={handleLogGrowth}
+          />
+          <DevelopmentProgress 
+            milestones={developmentMilestones} 
+            developmentScore={childData.developmentScore} 
+          />
+          
+          <UpcomingVaccines vaccines={upcomingVaccines} />
+          
+          <CareTips 
+            careTips={careTips}
+            currentTipIndex={currentTipIndex}
+            onNext={nextTip}
+            onPrevious={prevTip}
+          />
+        </View>
+      </ScrollView>
+
+      {/* Add Growth Modal */}
+      <AddGrowthModal
+        visible={showGrowthModal}
+        onClose={() => setShowGrowthModal(false)}
+      />
+    </>
   );
 };
 

@@ -20,7 +20,9 @@ const CareCenterHeader: React.FC<CareCenterHeaderProps> = ({
         paddingHorizontal: 24,
         paddingVertical: 20,
         borderRadius: 24,
+        marginTop: 20,
         marginBottom: 20,
+
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,

@@ -35,7 +35,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onTabChange 
               flex: 1,
               paddingVertical: 14,
               paddingHorizontal: 8,
-              backgroundColor: activeTab === tab.name ? '#3b82f6' : 'transparent',
+              backgroundColor: activeTab === tab.name ? '#1e40af' : 'transparent',
               marginHorizontal: activeTab === tab.name ? 4 : 0,
               marginVertical: activeTab === tab.name ? 4 : 0,
               borderRadius: activeTab === tab.name ? 12 : 0,

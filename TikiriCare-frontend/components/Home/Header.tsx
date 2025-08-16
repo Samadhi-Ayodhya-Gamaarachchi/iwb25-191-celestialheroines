@@ -9,7 +9,7 @@ interface HeaderSectionProps {
 const HeaderSection: React.FC<HeaderSectionProps> = ({ childName }) => {
   return (
     <LinearGradient
-      colors={['#667eea', '#764ba2']}
+      colors={['#3b82f6', '#1e40af']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{
