@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   addChildButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#1e40af',
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 10,

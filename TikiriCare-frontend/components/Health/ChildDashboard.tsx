@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { ChildData } from '../Health/HealthTypes';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface ChildDashboardProps {
   childData: ChildData;
@@ -8,17 +9,22 @@ interface ChildDashboardProps {
 
 const ChildDashboard: React.FC<ChildDashboardProps> = ({ childData }) => {
   return (
-    <View style={{
-      backgroundColor: '#6366f1',
-      borderRadius: 20,
-      padding: 20,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 12,
-      elevation: 8,
-      marginBottom: 16
-    }}>
+     <LinearGradient
+          colors={['#3b82f6', '#1e40af']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            paddingHorizontal: 24,
+            paddingVertical: 20,
+            borderRadius: 24,
+            marginBottom: 20,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+            elevation: 8,
+          }}
+        >
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -125,7 +131,7 @@ const ChildDashboard: React.FC<ChildDashboardProps> = ({ childData }) => {
           </View>
         </View>
       </View>
-    </View>
+   </LinearGradient>
   );
 };
 
