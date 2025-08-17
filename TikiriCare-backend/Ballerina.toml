@@ -1,14 +1,18 @@
 [package]
-org = "user"
-name = "TikiriCare_backend"
-version = "0.1.0"
-distribution = "2201.10.0"
+org = "tikiricare"
+name = "tikiricare_backend"
+version = "1.0.0"
 
 [build-options]
 observabilityIncluded = true
 
 [dependencies]
-"ballerina.jwt" = "*"
-"ballerina.http" = "*"
-"ballerina.time" = "*"
-"ballerinax/mongodb" = "5.1.0"
+"ballerina/http" = "^2.8.0"
+"ballerina/jwt" = "^2.8.0"
+"ballerina/time" = "^2.8.0"
+"ballerina/log" = "^2.8.0"
+"ballerina/uuid" = "^2.8.0"
+"ballerina/io" = "^2.8.0"
+"ballerinax/mongodb" = "^5.1.0"
+
+
