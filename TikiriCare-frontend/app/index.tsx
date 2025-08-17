@@ -1,11 +1,16 @@
-import { Text, View } from 'react-native';
-import "../global.css"
+// app/_layout.tsx (Root layout)
+import { Stack } from 'expo-router';
+import "../global.css";
+import { ChildProvider } from '@/context/ChildContext';
 
-export default function App() {
+export default function RootLayout() {
   return (
-    <View className="items-center justify-center flex-1 bg-white">
-      <Text className="text-5xl font-bold">Hello NativeWind!</Text>
-    </View>
+    <ChildProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="Add_child" options={{ title: 'Add Child' }} />
+        <Stack.Screen name="EditProfile_Parent" options={{ title: 'Edit Profile' }} />
+      </Stack>
+    </ChildProvider>
   );
 }
-
