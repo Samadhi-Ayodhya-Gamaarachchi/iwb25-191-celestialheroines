@@ -1,102 +1,51 @@
-// app/(tabs)/_layout.tsx (Updated Tab layout)
-import React from 'react';
-import { Tabs } from 'expo-router';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React, { useEffect } from 'react';
+import { Stack } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
+import { router } from 'expo-router';
+import { View, ActivityIndicator } from 'react-native';
 import { ChildProvider } from '@/context/ChildContext';
+import { AuthProvider } from '@/context/AuthContext';
 
-export default function TabLayout() {
+export default function RootLayout() {
   return (
-    <ChildProvider>
-    <Tabs
-      screenOptions={({ route }) => ({
-        tabBarActiveTintColor: '#1E90FF',
-        tabBarInactiveTintColor: 'gray',
-        tabBarStyle: { 
-          backgroundColor: '#fff', 
-          paddingBottom: 5, 
-          height: 60,
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
-        headerShown: false,
-        tabBarIcon: ({ color, size }) => {
-          let iconName: string;
-          
-          switch (route.name) {
-            case 'HomeScreen':
-              iconName = 'home-outline';
-              break;
-            case 'HealthScreen':
-              iconName = 'heart-outline';
-              break;
-            case 'CareCenterScreen':
-              iconName = 'business-outline';
-              break;
-            case 'ProfileScreen':
-              iconName = 'person-outline';
-              break;
-            default:
-              iconName = 'ellipse-outline';
-          }
-          
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-      })}
-    >
-      {/* Only include the screens you actually have */}
-      
-        <Tabs.Screen 
-          name="HomeScreen" 
-          options={{ 
-            title: 'Home',
-            tabBarLabel: 'Home',
-        }} 
-      />
-      <Tabs.Screen 
-        name="HealthScreen" 
-        options={{ 
-          title: 'Health',
-          tabBarLabel: 'Health',
-        }} 
-      />
-      <Tabs.Screen 
-        name="CareCenterScreen" 
-        options={{ 
-          title: 'Care Center',
-          tabBarLabel: 'Care',
-        }} 
-      />
-      <Tabs.Screen 
-        name="ProfileScreen" 
-        options={{ 
-          title: 'Profile',
-          tabBarLabel: 'Profile',
-        }} 
-      />
-      {/* Hide the HomeScreen tab since we're using index */}
-      <Tabs.Screen 
-        name="index" 
-        options={{ 
-          href: null, // This hides the tab
-        }} 
-      />
-      <Tabs.Screen 
-        name="Add_child" 
-        options={{ 
-          href: null, // This hides the tab
-        }} 
-      />
-      <Tabs.Screen 
-        name="EditProfile_Parent" 
-        options={{ 
-          href: null, // This hides the tab
-        }} 
-      />
-    </Tabs>
-    </ChildProvider>
+    <AuthProvider>
+      <ChildProvider>
+        <AppContent />
+      </ChildProvider>
+    </AuthProvider>
+  );
+}
+
+function AppContent() {
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (user) {
+        // User is authenticated, redirect to main app
+        router.replace('/(tabs)/' as any);
+      } else {
+        // User is not authenticated, redirect to login
+        router.replace('/LoginScreen' as any);
+      }
+    }
+  }, [user, isLoading]);
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-50">
+        <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="LoginScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="RegisterScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="Add_child" options={{ title: 'Add Child' }} />
+      <Stack.Screen name="EditProfile_Parent" options={{ title: 'Edit Profile' }} />
+    </Stack>
   );
 }
