@@ -3,8 +3,9 @@ import "../global.css"
 
 export default function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
+    <View className="items-center justify-center flex-1 bg-white">
       <Text className="text-5xl font-bold">Hello NativeWind!</Text>
     </View>
   );
 }
+
