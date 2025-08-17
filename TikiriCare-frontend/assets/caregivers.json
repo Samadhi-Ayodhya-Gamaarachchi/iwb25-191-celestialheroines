@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "name": "Happy Hearts Daycare",
+    "location": "Colombo",
+    "slots": 5,
+    "rating": 4.5,
+    "photo": "https://example.com/photo1.jpg",
+    "status": "available"
+  },
+  {
+    "id": "2",
+    "name": "Little Steps Care",
+    "location": "Kandy",
+    "slots": 2,
+    "rating": 4.8,
+    "photo": "https://example.com/photo2.jpg",
+    "status": "available"
+  }
+]

@@ -11,3 +11,4 @@ observabilityIncluded = true
 "ballerina.jwt" = "*"
 "ballerina.http" = "*"
 "ballerina.time" = "*"
+"ballerinax/mongodb" = "5.1.0"
