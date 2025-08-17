@@ -1,16 +1,9 @@
-// app/_layout.tsx (Root layout)
-import { Stack } from 'expo-router';
+// app/index.tsx (Entry point)
 import "../global.css";
-import { ChildProvider } from '@/context/ChildContext';
+import { Redirect } from 'expo-router';
 
-export default function RootLayout() {
-  return (
-    <ChildProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="Add_child" options={{ title: 'Add Child' }} />
-        <Stack.Screen name="EditProfile_Parent" options={{ title: 'Edit Profile' }} />
-      </Stack>
-    </ChildProvider>
-  );
+export default function Index() {
+  // This will redirect to the appropriate screen based on auth state
+  // The actual logic is handled in _layout.tsx
+  return <Redirect href="/LoginScreen" />;
 }

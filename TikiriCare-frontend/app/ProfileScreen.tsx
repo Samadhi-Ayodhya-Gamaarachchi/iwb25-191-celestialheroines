@@ -13,10 +13,12 @@ import { HelpModal } from '../components/Profile/HelpModel';
 
 // Import context and updated components
 import { useChild } from '../context/ChildContext';
+import { useAuth } from '../context/AuthContext';
 import { ChildrenSection } from '../components/Profile/ChildrenSection';
 
 export default function ProfileScreen() {
   const { children, selectedChild } = useChild();
+  const { logout } = useAuth();
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [helpVisible, setHelpVisible] = useState(false);
   const router = useRouter();
@@ -27,6 +29,27 @@ export default function ProfileScreen() {
 
   const handleEditProfile = () => {
     router.push('/EditProfile_Parent');
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            router.replace('/LoginScreen' as any);
+          },
+        },
+      ]
+    );
   };
 
   const handleChildPress = (childName: string) => {
@@ -70,6 +93,11 @@ export default function ProfileScreen() {
       id: 'help',
       label: 'Help',
       onPress: () => setHelpVisible(true),
+    },
+    {
+      id: 'logout',
+      label: 'Logout',
+      onPress: handleLogout,
     },
   ];
 
