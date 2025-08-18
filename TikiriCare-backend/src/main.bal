@@ -4,13 +4,14 @@ import ballerina/time;
 import ballerina/log;
 import ballerina/uuid;
 import ballerina/runtime;
+import ballerina/io;
 
 // Import types and MongoDB service
 import types;
 import mongodb_service;
 
 // JWT configuration
-final string JWT_SECRET = "tikiricare-super-secret-key-2024";
+final string JWT_SECRET = "tikiricare-super-secret-key-2024"; // In production, use environment variables
 final string JWT_ISSUER = "tikiricare-auth-service";
 
 // Main function to keep the service running
@@ -1053,4 +1054,5 @@ public function getVaccineDueDate(string dateOfBirth, string age) returns string
     
     time:Time dueDate = time:addDuration(birthDate, monthsToAdd, "MONTH");
     return time:format(dueDate, "yyyy-MM-dd");
-} 
+}
+ 

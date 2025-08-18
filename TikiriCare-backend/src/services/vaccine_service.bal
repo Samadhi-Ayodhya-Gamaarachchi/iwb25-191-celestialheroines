@@ -3,10 +3,8 @@ import ballerina/time;
 import ballerina/log;
 import ballerina/uuid;
 
-// Import types and constants
+// Import types
 import types;
-import utils;
-import vaccine_schedule;
 
 // In-memory vaccine store (in production, use a database)
 map<Vaccine> vaccineStore = {};
