@@ -69,6 +69,7 @@ export default function RegisterScreen() {
         name: parentName,
         email,
         telephone,
+        password,
       });
 
       if (success) {

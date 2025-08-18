@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '@/utils/api';
 
 export default function AddChildScreen() {
   const router = useRouter();
@@ -34,18 +36,28 @@ export default function AddChildScreen() {
     const ageString = calculateAge(dob);
 
     try {
-      const response = await fetch('http://localhost:8080/child/add', {
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/children`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, age: ageString, gender }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          name,
+          gender,
+          dateOfBirth: `${dob.getFullYear()}-${String(dob.getMonth() + 1).padStart(2, '0')}-${String(dob.getDate()).padStart(2, '0')}`,
+          height: 0,
+          weight: 0,
+        }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Success', `Child added: ${data.child.name}`);
+        Alert.alert('Success', data?.message || 'Child created');
         router.back();
       } else {
-        Alert.alert('Error', data.error || 'Failed to add child');
+        Alert.alert('Error', data?.message || 'Failed to add child');
       }
     } catch (error) {
       Alert.alert('Error', 'Network error or backend not running');
