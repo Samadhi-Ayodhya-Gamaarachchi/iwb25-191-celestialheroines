@@ -1,8 +1,19 @@
 import { RootStackParamList } from '@navigation/types';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 interface CenterProfile {
   // Basic Details
@@ -46,7 +57,6 @@ interface CenterProfile {
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   
-  // Sample profile data - in a real app, this would come from your state management or API
   const [profile] = useState<CenterProfile>({
     centerName: 'Little Stars Care Center',
     registrationNumber: 'CC-2024-001',
@@ -76,268 +86,519 @@ const ProfileScreen: React.FC = () => {
   });
 
   const handleEditProfile = () => {
-    Alert.alert('Edit Profile', 'Navigate to edit profile screen', 
-      [{ text: 'OK', style: 'default' }]);
+    navigation.navigate('EditProfile');
   };
 
-  const renderInfoCard = (title: string, icon: string, children: React.ReactNode) => (
-    <View style={styles.infoCard}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardIcon}>{icon}</Text>
-        <Text style={styles.cardTitle}>{title}</Text>
-      </View>
-      {children}
-    </View>
-  );
+  const handleContactAction = (type: 'call' | 'email' | 'website') => {
+    const actions = {
+      call: () => Alert.alert('Call', `Calling ${profile.mobileNumber}`),
+      email: () => Alert.alert('Email', `Opening ${profile.email}`),
+      website: () => Alert.alert('Website', `Opening ${profile.website}`)
+    };
+    actions[type]();
+  };
 
-  const renderInfoRow = (label: string, value: string, emoji?: string) => (
-    <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>
-        {emoji && `${emoji} `}{label}:
-      </Text>
-      <Text style={styles.infoValue}>{value || 'Not specified'}</Text>
-    </View>
-  );
+  // Quick stats similar to HomeScreen
+  const profileStats = [
+    { label: 'Max Capacity', value: profile.maxCapacity, icon: '👶', color: '#FF6B6B' },
+    { label: 'Staff Members', value: profile.staffCount, icon: '👨‍🏫', color: '#4ECDC4' },
+    { label: 'Rating', value: '4.8★', icon: '⭐', color: '#45B7D1' },
+  ];
 
-  const renderFacilityBadge = (label: string, hasFeature: boolean, emoji: string) => (
-    <View style={[styles.facilityBadge, hasFeature ? styles.activeFacility : styles.inactiveFacility]}>
-      <Text style={styles.facilityEmoji}>{emoji}</Text>
-      <Text style={[styles.facilityText, hasFeature ? styles.activeFacilityText : styles.inactiveFacilityText]}>
-        {label}
-      </Text>
-    </View>
-  );
+  // Contact actions similar to HomeScreen quick actions
+  const contactActions = [
+    { title: 'Call Center', icon: '📞', color: '#4CAF50', action: () => handleContactAction('call') },
+    { title: 'Send Email', icon: '✉️', color: '#FF9800', action: () => handleContactAction('email') },
+    { title: 'Visit Website', icon: '🌐', color: '#2196F3', action: () => handleContactAction('website') },
+  ];
+
+  // Facilities with HomeScreen style
+  const facilitiesData = [
+    { name: 'Indoor Play Area', available: profile.hasIndoorPlayArea, icon: '🏠' },
+    { name: 'Outdoor Play Area', available: profile.hasOutdoorPlayArea, icon: '🌳' },
+    { name: 'Meals Provided', available: profile.providesMeals, icon: '🍽️' },
+    { name: 'Medical Aid', available: profile.hasMedicalAid, icon: '🏥' },
+    { name: 'CCTV Security', available: profile.hasCCTV, icon: '📹' },
+  ];
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>🌸 Profile</Text>
-          <Text style={styles.centerName}>{profile.centerName}</Text>
-          <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
-            <Text style={styles.editButtonText}>✏️ Edit Profile</Text>
-          </TouchableOpacity>
-        </View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header with Gradient - similar to HomeScreen */}
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        style={styles.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        {/* Back Button */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={styles.backIcon}>←</Text>
+        </TouchableOpacity>
 
-        {/* Basic Details */}
-        {renderInfoCard('Basic Information', '🏠', (
-          <>
-            {renderInfoRow('Center Name', profile.centerName, '🏢')}
-            {renderInfoRow('Registration Number', profile.registrationNumber, '📋')}
-            {renderInfoRow('Type', profile.centerType, '🎯')}
-          </>
-        ))}
-
-        {/* Location Details */}
-        {renderInfoCard('Location', '📍', (
-          <>
-            {renderInfoRow('Address', profile.address, '🏠')}
-            {renderInfoRow('City', profile.city, '🏙️')}
-            {renderInfoRow('Postal Code', profile.postalCode, '📮')}
-          </>
-        ))}
-
-        {/* Contact Information */}
-        {renderInfoCard('Contact Information', '📞', (
-          <>
-            {renderInfoRow('Mobile', profile.mobileNumber, '📱')}
-            {renderInfoRow('Landline', profile.landlineNumber, '☎️')}
-            {renderInfoRow('Email', profile.email, '📧')}
-            {renderInfoRow('Website', profile.website, '🌐')}
-            {renderInfoRow('Social Media', profile.socialMediaLinks, '📱')}
-          </>
-        ))}
-
-        {/* Operational Details */}
-        {renderInfoCard('Operating Hours', '⏰', (
-          <>
-            {renderInfoRow('Weekdays', profile.weekdayHours, '📅')}
-            {renderInfoRow('Weekends', profile.weekendHours, '🎡')}
-            {renderInfoRow('Age Groups', profile.ageGroups, '👶')}
-            {renderInfoRow('Max Capacity', `${profile.maxCapacity} children`, '👥')}
-            {renderInfoRow('Staff Count', `${profile.staffCount} members`, '👨‍🏫')}
-          </>
-        ))}
-
-        {/* Facilities */}
-        {renderInfoCard('Facilities & Services', '🎨', (
-          <>
-            <View style={styles.facilitiesGrid}>
-              {renderFacilityBadge('Indoor Play', profile.hasIndoorPlayArea, '🏠')}
-              {renderFacilityBadge('Outdoor Play', profile.hasOutdoorPlayArea, '🌳')}
-              {renderFacilityBadge('Meals', profile.providesMeals, '🍽️')}
-              {renderFacilityBadge('Medical Aid', profile.hasMedicalAid, '🏥')}
-              {renderFacilityBadge('CCTV', profile.hasCCTV, '📹')}
+        <View style={styles.headerContent}>
+          {/* Avatar similar to logo in HomeScreen */}
+          <View style={styles.logoContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>LS</Text>
             </View>
-            {renderInfoRow('Special Programs', profile.specialPrograms, '🎭')}
-          </>
-        ))}
-
-        {/* Additional Features */}
-        {renderInfoCard('Additional Information', '✨', (
-          <>
-            {renderInfoRow('Certifications', profile.certifications, '🏆')}
-            {renderInfoRow('Payment Methods', profile.paymentMethods, '💳')}
-            {renderInfoRow('Fee Structure', profile.feeStructure, '💰')}
-          </>
-        ))}
-
-        {/* Action Buttons */}
-        <View style={styles.actionContainer}>
-          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.actionButtonText}>← Back to Home</Text>
-          </TouchableOpacity>
+            <View style={styles.verifiedBadge}>
+              <Text style={styles.verifiedIcon}>✓</Text>
+            </View>
+          </View>
+          <Text style={styles.centerName}>{profile.centerName}</Text>
+          <Text style={styles.greeting}>Profile Overview 👤</Text>
         </View>
-      </ScrollView>
-    </View>
+      </LinearGradient>
+
+      {/* Quick Statistics - same style as HomeScreen */}
+      <View style={styles.statsContainer}>
+        <Text style={styles.sectionTitle}>Profile Statistics</Text>
+        <View style={styles.statsRow}>
+          {profileStats.map(stat => (
+            <View key={stat.label} style={[styles.statCard, { backgroundColor: stat.color }]}>
+              <Text style={styles.statIcon}>{stat.icon}</Text>
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* Quick Contact Actions - similar to HomeScreen quick actions */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitleMain}>Quick Contact</Text>
+        <View style={styles.actionsGrid}>
+          {contactActions.map((action, index) => (
+            <TouchableOpacity 
+              key={index} 
+              style={[styles.actionCard, { backgroundColor: action.color }]}
+              onPress={action.action}
+            >
+              <Text style={styles.actionIcon}>{action.icon}</Text>
+              <Text style={styles.actionTitle}>{action.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Basic Information - similar to HomeScreen center info */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitleMain}>Basic Information</Text>
+        <View style={styles.infoGrid}>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>📋</Text>
+            <View>
+              <Text style={styles.infoLabel}>Registration ID</Text>
+              <Text style={styles.infoValue}>{profile.registrationNumber}</Text>
+            </View>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>🎯</Text>
+            <View>
+              <Text style={styles.infoLabel}>Center Type</Text>
+              <Text style={styles.infoValue}>{profile.centerType}</Text>
+            </View>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>📍</Text>
+            <View>
+              <Text style={styles.infoLabel}>Location</Text>
+              <Text style={styles.infoValue}>{profile.city}, {profile.postalCode}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Contact Information */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitleMain}>Contact Information</Text>
+        <View style={styles.infoGrid}>
+          <TouchableOpacity style={styles.infoItem} onPress={() => handleContactAction('call')}>
+            <Text style={styles.infoIcon}>📱</Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Mobile</Text>
+              <Text style={styles.infoValue}>{profile.mobileNumber}</Text>
+            </View>
+            <Text style={styles.actionArrow}>→</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.infoItem} onPress={() => handleContactAction('email')}>
+            <Text style={styles.infoIcon}>✉️</Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoValue}>{profile.email}</Text>
+            </View>
+            <Text style={styles.actionArrow}>→</Text>
+          </TouchableOpacity>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>🕒</Text>
+            <View>
+              <Text style={styles.infoLabel}>Operating Hours</Text>
+              <Text style={styles.infoValue}>{profile.weekdayHours}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Facilities Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitleMain}>Facilities & Services</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{facilitiesData.filter(f => f.available).length}</Text>
+          </View>
+        </View>
+        
+        {facilitiesData.map((facility, index) => (
+          <View key={index} style={[styles.facilityCard, 
+            facility.available ? styles.availableFacility : styles.unavailableFacility
+          ]}>
+            <View style={styles.facilityInfo}>
+              <Text style={styles.facilityIcon}>{facility.icon}</Text>
+              <Text style={styles.facilityName}>{facility.name}</Text>
+            </View>
+            <View style={[styles.statusBadge, 
+              facility.available ? styles.availableBadge : styles.unavailableBadge
+            ]}>
+              <Text style={[styles.statusText,
+                facility.available ? styles.availableText : styles.unavailableText
+              ]}>
+                {facility.available ? 'Available' : 'Not Available'}
+              </Text>
+            </View>
+          </View>
+        ))}
+        
+        <View style={styles.infoItem}>
+          <Text style={styles.infoIcon}>🎭</Text>
+          <View>
+            <Text style={styles.infoLabel}>Special Programs</Text>
+            <Text style={styles.infoValue}>{profile.specialPrograms}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Financial Information */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitleMain}>Pricing & Payments</Text>
+        <View style={styles.infoGrid}>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>💰</Text>
+            <View>
+              <Text style={styles.infoLabel}>Fee Structure</Text>
+              <Text style={styles.infoValue}>{profile.feeStructure}</Text>
+            </View>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>💳</Text>
+            <View>
+              <Text style={styles.infoLabel}>Payment Methods</Text>
+              <Text style={styles.infoValue}>{profile.paymentMethods}</Text>
+            </View>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>🏆</Text>
+            <View>
+              <Text style={styles.infoLabel}>Certifications</Text>
+              <Text style={styles.infoValue}>{profile.certifications}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Edit Profile Button - similar to HomeScreen */}
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.editBtn} onPress={handleEditProfile}>
+          <Text style={styles.editBtnText}>✏️ Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.bottomSpacing} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDDDE6', // Blush Pink background
+  container: { 
+    flex: 1, 
+    backgroundColor: '#f8f9fa' 
   },
-  header: {
-    alignItems: 'center',
+  header: { 
     paddingTop: 60,
     paddingBottom: 30,
-    backgroundColor: '#FFFFFF', // Cloud White
+    paddingHorizontal: 20,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    marginBottom: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  backIcon: {
+    fontSize: 20,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  headerContent: {
+    alignItems: 'center',
+  },
+  logoContainer: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+    borderRadius: 50,
+    backgroundColor: '#fff',
+    padding: 5,
+    position: 'relative',
   },
-  title: {
-    fontSize: 28,
+  avatar: { 
+    width: 90, 
+    height: 90, 
+    borderRadius: 45,
+    backgroundColor: '#667EEA',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#FF69B4',
-    marginBottom: 10,
+    color: '#FFFFFF',
   },
-  centerName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
+  verifiedBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+  },
+  verifiedIcon: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  centerName: { 
+    fontSize: 28, 
+    fontWeight: 'bold', 
+    color: '#fff',
+    marginTop: 15,
     textAlign: 'center',
   },
-  editButton: {
-    backgroundColor: '#B8E0F4', // Baby Blue
+  greeting: { 
+    fontSize: 16, 
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 5,
+  },
+  statsContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#2196F3',
+    paddingTop: 25,
   },
-  editButtonText: {
-    color: '#2196F3',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  infoCard: {
-    backgroundColor: '#FFFFFF', // Cloud White
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5E6DC',
-  },
-  cardIcon: {
-    fontSize: 24,
-    marginRight: 10,
-  },
-  cardTitle: {
-    fontSize: 18,
+  sectionTitle: { 
+    fontSize: 20, 
     fontWeight: 'bold',
-    color: '#333',
+    color: '#2c3e50',
+    marginBottom: 5,
   },
-  infoRow: {
-    marginBottom: 12,
+  statsRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    marginTop: 15,
   },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+  statCard: { 
+    alignItems: 'center', 
+    padding: 20, 
+    borderRadius: 20, 
+    width: (width - 60) / 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  statIcon: { 
+    fontSize: 30,
+    marginBottom: 8,
+  },
+  statValue: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    color: '#fff',
     marginBottom: 4,
   },
-  infoValue: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 22,
+  statLabel: { 
+    fontSize: 11, 
+    color: 'rgba(255,255,255,0.9)', 
+    textAlign: 'center',
+    fontWeight: '600',
   },
-  facilitiesGrid: {
+  section: { 
+    marginHorizontal: 20, 
+    marginTop: 25, 
+    backgroundColor: '#fff', 
+    borderRadius: 20, 
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  sectionHeader: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 15,
   },
-  facilityBadge: {
-    width: '48%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
+  sectionTitleMain: { 
+    fontSize: 18, 
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 15,
+  },
+  badge: {
+    backgroundColor: '#4CAF50',
     borderRadius: 12,
-    marginBottom: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    minWidth: 24,
+    alignItems: 'center',
   },
-  activeFacility: {
-    backgroundColor: '#CFF4D2', // Pastel Green
-    borderWidth: 1,
-    borderColor: '#4CAF50',
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
-  inactiveFacility: {
-    backgroundColor: '#F5F5F5',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+  actionsGrid: {
+    gap: 15,
   },
-  facilityEmoji: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  facilityText: {
-    fontSize: 14,
-    fontWeight: '600',
-    flex: 1,
-  },
-  activeFacilityText: {
-    color: '#2E7D32',
-  },
-  inactiveFacilityText: {
-    color: '#999',
-  },
-  actionContainer: {
-    paddingHorizontal: 20,
-    marginTop: 10,
-    marginBottom: 40,
-  },
-  actionButton: {
-    backgroundColor: '#F5E6DC', // Warm Beige
-    borderWidth: 2,
-    borderColor: '#D4C4B0',
-    padding: 18,
+  actionCard: {
+    padding: 20,
     borderRadius: 15,
     alignItems: 'center',
+    marginBottom: 10,
   },
-  actionButtonText: {
-    fontSize: 16,
+  actionIcon: {
+    fontSize: 30,
+    marginBottom: 8,
+  },
+  actionTitle: {
+    color: '#fff',
     fontWeight: 'bold',
-    color: '#333',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  infoGrid: {
+    gap: 15,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    padding: 15,
+    borderRadius: 12,
+  },
+  infoIcon: {
+    fontSize: 24,
+    marginRight: 15,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#2c3e50',
+    fontWeight: '500',
+  },
+  actionArrow: {
+    fontSize: 16,
+    color: '#667eea',
+    fontWeight: 'bold',
+  },
+  facilityCard: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+  },
+  availableFacility: {
+    backgroundColor: '#f0fff4',
+    borderLeftColor: '#4CAF50',
+  },
+  unavailableFacility: {
+    backgroundColor: '#fff5f5',
+    borderLeftColor: '#ff6b6b',
+  },
+  facilityInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  facilityIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  facilityName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+  statusBadge: {
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  availableBadge: {
+    backgroundColor: '#4CAF50',
+  },
+  unavailableBadge: {
+    backgroundColor: '#ff6b6b',
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  availableText: {
+    color: '#fff',
+  },
+  unavailableText: {
+    color: '#fff',
+  },
+  editBtn: { 
+    backgroundColor: '#667eea',
+    borderRadius: 12,
+    padding: 15,
+    alignItems: 'center',
+  },
+  editBtnText: { 
+    color: '#fff', 
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  bottomSpacing: {
+    height: 30,
   },
 });
 

@@ -25,7 +25,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onEditProfile }) => {
   const stats = [
     { label: 'Total Children Enrolled', value: 120, icon: '👶', color: '#FF6B6B' },
     { label: 'Total Parents Connected', value: 85, icon: '👨‍👩‍👧', color: '#4ECDC4' },
-    { label: 'Pending Parent Requests', value: 3, icon: '📩', color: '#45B7D1' },
+    { label: 'Pending Parent Requests', value: 2, icon: '📩', color: '#45B7D1' },
   ];
 
   const pendingRequests = [
@@ -90,24 +90,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onEditProfile }) => {
             <Text style={styles.badgeText}>{pendingRequests.length}</Text>
           </View>
         </View>
+        
         {pendingRequests.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyIcon}>✨</Text>
             <Text style={styles.emptyText}>All caught up! No pending requests.</Text>
           </View>
         ) : (
-          pendingRequests.map((req) => (
-            <View key={req.id} style={styles.requestCard}>
-              <View style={styles.requestInfo}>
-                <Text style={styles.parentName}>{req.parent}</Text>
-                <Text style={styles.childName}>Child: {req.child}</Text>
-                <Text style={styles.requestDate}>📅 {req.date}</Text>
-              </View>
-              <TouchableOpacity style={styles.reviewBtn}>
-                <Text style={styles.reviewBtnText}>Review</Text>
-              </TouchableOpacity>
-            </View>
-          ))
+          <View style={styles.pendingRequestsContainer}>
+            <Text style={styles.pendingMessage}>
+              You have {pendingRequests.length} pending parent request{pendingRequests.length > 1 ? 's' : ''} waiting for review.
+            </Text>
+            <TouchableOpacity
+              style={styles.viewRequestsBtn}
+              onPress={() => navigation.navigate('Request')}
+            >
+              <Text style={styles.viewRequestsBtnText}>📋 View All Pending Requests</Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
@@ -137,18 +137,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onEditProfile }) => {
             </View>
           </View>
         </View>
-        <TouchableOpacity
-          style={styles.editBtn}
-          onPress={() => {
-            if (onEditProfile) {
-              onEditProfile();
-            } else {
-              navigation.navigate('Registration');
-            }
-          }}
-        >
-          <Text style={styles.editBtnText}>✏️ Edit Profile</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Announcements / Updates */}
@@ -483,6 +471,34 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 30,
+  },
+  pendingRequestsContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  pendingMessage: {
+    fontSize: 16,
+    color: '#2c3e50',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  viewRequestsBtn: {
+    backgroundColor: '#667eea',
+    borderRadius: 15,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  viewRequestsBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

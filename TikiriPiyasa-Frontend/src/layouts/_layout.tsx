@@ -14,8 +14,11 @@ const tabs = [
   { id: 'Search', label: 'Search', icon: 'search-outline', activeIcon: 'search' },
   { id: 'Cart', label: 'Cart', icon: 'bag-outline', activeIcon: 'bag' },
   { id: 'Orders', label: 'Orders', icon: 'receipt-outline', activeIcon: 'receipt' },
+  { id: 'Request', label: 'Requests', icon: 'document-text-outline', activeIcon: 'document-text' }, // NEW
   { id: 'Profile', label: 'Profile', icon: 'person-outline', activeIcon: 'person' },
 ];
+
+const NUMBER = 2; // Example number for badge
 
 const FooterNavigation: React.FC = () => {
   const navigation = useNavigation();
@@ -53,6 +56,11 @@ const FooterNavigation: React.FC = () => {
                 >
                   {tab.label}
                 </Text>
+                {tab.id === 'Request' && NUMBER > 0 && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{NUMBER}</Text>
+                  </View>
+                )}
               </TouchableOpacity>
             );
         })}
@@ -93,6 +101,23 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 4,
     textAlign: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: 2,
+    right: 10,
+    backgroundColor: '#E74C3C',
+    borderRadius: 10,
+    paddingHorizontal: 5,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });
 

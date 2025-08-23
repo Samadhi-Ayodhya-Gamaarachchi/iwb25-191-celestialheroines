@@ -5,8 +5,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
 import MainLayout from './src/layouts/MainLayout';
+import ChildDetailsScreen from './src/screens/ChildDetails';
+import ChildrenListScreen from './src/screens/ChildrenListScreen';
+import EditProfileScreen from './src/screens/EditProfileScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import ParentsListScreen from './src/screens/ParentsList'; // optional
 import ProfileScreen from './src/screens/ProfileScreen';
+import RequestScreen from './src/screens/RequestScreen';
 
 // Wrap each screen with MainLayout
 const WrappedHomeScreen = () => (
@@ -39,6 +44,31 @@ const WrappedProfileScreen = () => (
   </MainLayout>
 );
 
+const WrappedRequestScreen = () => (
+  <MainLayout>
+    <RequestScreen />
+  </MainLayout>
+);
+
+const WrappedChildrenScreen = () => (
+  <MainLayout>
+    <ChildrenListScreen />
+  </MainLayout>
+);
+
+const WrappedChildDetailsScreen = () => (
+  <MainLayout>
+    <ChildDetailsScreen />
+  </MainLayout>
+);
+
+// (Optional)
+const WrappedParentsScreen = () => (
+  <MainLayout>
+    <ParentsListScreen />
+  </MainLayout>
+);
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -51,7 +81,12 @@ export default function App() {
             <Stack.Screen name="Search" component={WrappedSearchScreen} />
             <Stack.Screen name="Cart" component={WrappedCartScreen} />
             <Stack.Screen name="Orders" component={WrappedOrdersScreen} />
+            <Stack.Screen name="Request" component={WrappedRequestScreen} />
             <Stack.Screen name="Profile" component={WrappedProfileScreen} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="Children" component={WrappedChildrenScreen} />
+            <Stack.Screen name="ChildDetails" component={WrappedChildDetailsScreen} />
+            {/* <Stack.Screen name="Parents" component={WrappedParentsScreen} /> */}
           </Stack.Navigator>
           <StatusBar style="auto" />
         </SafeAreaView>

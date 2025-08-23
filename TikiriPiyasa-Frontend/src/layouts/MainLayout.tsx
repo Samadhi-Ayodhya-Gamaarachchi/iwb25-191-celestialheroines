@@ -2,28 +2,18 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import FooterNavigation from './_layout';
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        {children}
-      </View>
+    <View style={styles.root}>
+      <View style={styles.content}>{children}</View>
       <FooterNavigation />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-  },
+  root: { flex: 1, backgroundColor: '#F8FAFF' },
+  content: { flex: 1 },
 });
 
 export default MainLayout;
