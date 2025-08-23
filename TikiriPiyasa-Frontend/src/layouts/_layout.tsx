@@ -12,9 +12,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const tabs = [
   { id: 'Home', label: 'Home', icon: 'home-outline', activeIcon: 'home' },
   { id: 'Search', label: 'Search', icon: 'search-outline', activeIcon: 'search' },
-  { id: 'Cart', label: 'Cart', icon: 'bag-outline', activeIcon: 'bag' },
-  { id: 'Orders', label: 'Orders', icon: 'receipt-outline', activeIcon: 'receipt' },
-  { id: 'Request', label: 'Requests', icon: 'document-text-outline', activeIcon: 'document-text' }, // NEW
+  { id: 'Children', label: 'Children', icon: 'people-outline', activeIcon: 'people' }, // NEW -> navigates to ChildrenListScreen
+  { id: 'Request', label: 'Requests', icon: 'document-text-outline', activeIcon: 'document-text' },
   { id: 'Profile', label: 'Profile', icon: 'person-outline', activeIcon: 'person' },
 ];
 

@@ -9,7 +9,6 @@ import ChildDetailsScreen from './src/screens/ChildDetails';
 import ChildrenListScreen from './src/screens/ChildrenListScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import HomeScreen from './src/screens/HomeScreen';
-import ParentsListScreen from './src/screens/ParentsList'; // optional
 import ProfileScreen from './src/screens/ProfileScreen';
 import RequestScreen from './src/screens/RequestScreen';
 
@@ -59,13 +58,6 @@ const WrappedChildrenScreen = () => (
 const WrappedChildDetailsScreen = () => (
   <MainLayout>
     <ChildDetailsScreen />
-  </MainLayout>
-);
-
-// (Optional)
-const WrappedParentsScreen = () => (
-  <MainLayout>
-    <ParentsListScreen />
   </MainLayout>
 );
 
