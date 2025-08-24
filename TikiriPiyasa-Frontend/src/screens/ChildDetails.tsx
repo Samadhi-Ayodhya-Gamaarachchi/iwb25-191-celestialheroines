@@ -246,23 +246,6 @@ const ChildDetails: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionSection}>
-          <TouchableOpacity 
-            style={styles.editButton} 
-            onPress={() => Alert.alert('Edit Child', 'Edit functionality coming soon!')}
-          >
-            <Text style={styles.editButtonText}>✏️ Edit Information</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.removeButton} 
-            onPress={handleRemove}
-          >
-            <Text style={styles.removeButtonText}>🗑 Remove Child</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
     </View>
   );

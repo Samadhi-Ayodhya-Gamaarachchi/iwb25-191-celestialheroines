@@ -206,23 +206,6 @@ const ChildrenListScreen: React.FC = () => {
         )}
       />
 
-      {/* Floating Add Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => {
-          // TODO: navigate to Add Child form
-        }}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={['#667eea', '#764ba2']}
-          style={styles.fabGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Text style={styles.fabIcon}>+</Text>
-        </LinearGradient>
-      </TouchableOpacity>
     </View>
   );
 };
