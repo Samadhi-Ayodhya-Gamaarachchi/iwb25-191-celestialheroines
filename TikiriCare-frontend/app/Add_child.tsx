@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { childrenAPI } from '../services/api';
 
 export default function AddChildScreen() {
   const router = useRouter();
@@ -34,18 +35,19 @@ export default function AddChildScreen() {
     const ageString = calculateAge(dob);
 
     try {
-      const response = await fetch('http://localhost:8080/child/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, age: ageString, gender }),
+      const result = await childrenAPI.addChild({
+        name,
+        gender,
+        dateOfBirth: dob.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
+        height: 0,
+        weight: 0
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Success', `Child added: ${data.child.name}`);
+      if (result.success) {
+        Alert.alert('Success', `Child added: ${result.data.name}`);
         router.back();
       } else {
-        Alert.alert('Error', data.error || 'Failed to add child');
+        Alert.alert('Error', result.message || 'Failed to add child');
       }
     } catch (error) {
       Alert.alert('Error', 'Network error or backend not running');

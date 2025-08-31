@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Alert, Text } from 'react-native';
+import { ScrollView, View, Alert, Text, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 import HeaderSection from '../components/Home/Header';
 import ChildInfoCard from '../components/Home/ChildInfo';
 import DevelopmentProgress from '../components/Home/DevelopmentProgress';
@@ -18,9 +19,32 @@ import {
 } from '../components/Home/HomeType';
 
 const HealthTrackerHome: React.FC = () => {
-  const { selectedChild } = useChild();
+  const { selectedChild, children } = useChild();
   const [currentTipIndex, setCurrentTipIndex] = useState<number>(0);
   const [showGrowthModal, setShowGrowthModal] = useState<boolean>(false); // Add modal state
+
+  // If no children exist, show add child prompt
+  if (children.length === 0) {
+    return (
+      <ScrollView className="bg-gray-50 min-h-full max-w-md mx-auto">
+        <View className="px-5 py-8 items-center justify-center min-h-screen">
+          <Text className="text-6xl mb-4">👶</Text>
+          <Text className="text-xl font-semibold text-gray-700 text-center mb-4">
+            Welcome to TikiriCare!
+          </Text>
+          <Text className="text-base text-gray-600 text-center mb-8">
+            Start by adding your child's information to track their health and development.
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push('/Add_child')}
+            className="bg-blue-500 px-6 py-3 rounded-full"
+          >
+            <Text className="text-white font-semibold text-base">Add Your First Child</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  }
 
   // If no child is selected, show a message
   if (!selectedChild) {

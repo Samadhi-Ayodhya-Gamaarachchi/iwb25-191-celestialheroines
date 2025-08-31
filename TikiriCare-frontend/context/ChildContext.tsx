@@ -1,5 +1,7 @@
 // app/context/ChildContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { childrenAPI } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 // Extended Child interface to match your existing data and add health info
 export interface Child {
@@ -27,6 +29,8 @@ interface ChildContextType {
   addChild: (child: Child) => void;
   updateChild: (childId: number, updates: Partial<Child>) => void;
   removeChild: (childId: number) => void;
+  refreshChildren: () => Promise<void>;
+  isLoading: boolean;
 }
 
 const ChildContext = createContext<ChildContextType | undefined>(undefined);
@@ -44,58 +48,110 @@ interface ChildProviderProps {
 }
 
 export const ChildProvider: React.FC<ChildProviderProps> = ({ children }) => {
-  // Initialize with your existing data structure
-  const [childrenList, setChildrenList] = useState<Child[]>([
-    {
-      id: 1,
-      name: 'Malith Fernando',
-      age: '2y 3m', // Standardized format for age calculations
-      gender: 'Male',
-      avatar: 'M',
-      color: '#4A90E2',
-      // Add health data
-      height: 89,
-      weight: 12.5,
-      bmi: 15.8,
-      developmentScore: 85,
-      lastCheckup: 'July 25, 2025',
-      heightChange: '+2 cm',
-      weightChange: '+0.4 kg',
-      bmiStatus: 'Normal'
-    },
-    {
-      id: 2,
-      name: 'Amaya Fernando',
-      age: '6m', // 6 months
-      gender: 'Female',
-      avatar: 'A',
-      color: '#E94B7D',
-      // Add health data for the baby
-      height: 68,
-      weight: 8.2,
-      bmi: 17.7,
-      developmentScore: 78,
-      lastCheckup: 'August 10, 2025',
-      heightChange: '+3 cm',
-      weightChange: '+0.8 kg',
-      bmiStatus: 'Normal'
-    },
-  ]);
+  const { user } = useAuth();
+  
+  // Initialize with empty array - data will be loaded from API
+  const [childrenList, setChildrenList] = useState<Child[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Start with first child selected by default
-  const [selectedChild, setSelectedChild] = useState<Child | null>(
-    childrenList.length > 0 ? childrenList[0] : null
-  );
+  // Start with no child selected initially
+  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
 
-  const addChild = (child: Child) => {
-    const newChild = {
-      ...child,
-      id: Math.max(...childrenList.map(c => c.id), 0) + 1
-    };
-    setChildrenList(prev => [...prev, newChild]);
+  // Load children from API when user is authenticated
+  useEffect(() => {
+    if (user) {
+      refreshChildren();
+    } else {
+      setChildrenList([]);
+      setSelectedChild(null);
+    }
+  }, [user]);
+
+  const refreshChildren = async () => {
+    if (!user) return;
     
-    // Auto-select the new child
-    setSelectedChild(newChild);
+    try {
+      setIsLoading(true);
+      const response = await childrenAPI.getChildren();
+      
+      if (response.children && Array.isArray(response.children)) {
+        const transformedChildren = response.children.map((child: any) => ({
+          id: child.id,
+          name: child.name,
+          age: child.age,
+          gender: child.gender,
+          avatar: child.name.charAt(0).toUpperCase(),
+          color: child.gender === 'male' ? '#4A90E2' : '#E94B7D',
+          height: child.height,
+          weight: child.weight,
+          bmi: child.bmi,
+          developmentScore: child.developmentScore || 85,
+          lastCheckup: child.lastCheckup,
+          heightChange: child.heightChange,
+          weightChange: child.weightChange,
+          bmiStatus: child.bmiStatus || 'Normal'
+        }));
+        
+        setChildrenList(transformedChildren);
+        
+        // Auto-select first child if none selected
+        if (transformedChildren.length > 0 && !selectedChild) {
+          setSelectedChild(transformedChildren[0]);
+        }
+      } else {
+        setChildrenList([]);
+      }
+    } catch (error) {
+      console.error('Error loading children:', error);
+      setChildrenList([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addChild = async (child: Child) => {
+    try {
+      // Convert age to dateOfBirth (approximate calculation)
+      const calculateDateOfBirth = (age: string) => {
+        const now = new Date();
+        const years = parseInt(age.match(/(\d+)y/)?.[1] || '0');
+        const months = parseInt(age.match(/(\d+)m/)?.[1] || '0');
+        const birthDate = new Date(now.getFullYear() - years, now.getMonth() - months);
+        return birthDate.toISOString().split('T')[0];
+      };
+      
+      const newChildData = {
+        name: child.name,
+        gender: child.gender.toLowerCase(),
+        dateOfBirth: calculateDateOfBirth(child.age),
+        height: child.height,
+        weight: child.weight,
+      };
+      
+      const response = await childrenAPI.addChild(newChildData);
+      
+      if (response.child) {
+        const transformedChild = {
+          ...child,
+          id: response.child.id,
+          avatar: child.name.charAt(0).toUpperCase(),
+          color: child.gender.toLowerCase() === 'male' ? '#4A90E2' : '#E94B7D',
+          developmentScore: 85
+        };
+        
+        setChildrenList(prev => [...prev, transformedChild]);
+        setSelectedChild(transformedChild);
+      }
+    } catch (error) {
+      console.error('Error adding child:', error);
+      // Fallback to local add if API fails
+      const newChild = {
+        ...child,
+        id: Math.max(...childrenList.map(c => c.id), 0) + 1
+      };
+      setChildrenList(prev => [...prev, newChild]);
+      setSelectedChild(newChild);
+    }
   };
 
   const updateChild = (childId: number, updates: Partial<Child>) => {
@@ -127,7 +183,9 @@ export const ChildProvider: React.FC<ChildProviderProps> = ({ children }) => {
     setSelectedChild,
     addChild,
     updateChild,
-    removeChild
+    removeChild,
+    refreshChildren,
+    isLoading
   };
 
   return (

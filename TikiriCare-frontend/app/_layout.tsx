@@ -23,10 +23,10 @@ function AppContent() {
     if (!isLoading) {
       if (user) {
         // User is authenticated, redirect to main app
-        router.replace('/(tabs)/' as any);
+        router.replace('/(tabs)');
       } else {
         // User is not authenticated, redirect to login
-        router.replace('/LoginScreen' as any);
+        router.replace('/LoginScreen');
       }
     }
   }, [user, isLoading]);
