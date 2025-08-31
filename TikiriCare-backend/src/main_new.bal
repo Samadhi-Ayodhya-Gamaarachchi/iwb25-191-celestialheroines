@@ -514,7 +514,7 @@ service / on httpListener {
     resource function get caregivers(http:Caller caller, http:Request req) returns error? {
         json[] caregiverList = [];
         
-        foreach var caregiver in caregivers {
+        foreach var [_, caregiver] in caregivers.entries() {
             if (caregiver.available) {
                 json caregiverJson = {
                     id: caregiver.id,
@@ -566,7 +566,7 @@ service / on httpListener {
                 servicesJson = servicesData;
             }
             string[] services = [];
-            foreach json serviceItem in servicesJson {
+            foreach var serviceItem in servicesJson {
                 services.push(serviceItem.toString());
             }
 
@@ -621,9 +621,6 @@ public function main() {
     log:printInfo("Sample credentials:");
     log:printInfo("Email: parent@test.com");
     log:printInfo("Password: password123");
-    log:printInfo("=================================================");
-    log:printInfo("MongoDB Atlas Integration: Enabled");
-    log:printInfo("Connection String: mongodb+srv://user01:celestial4@...");
     log:printInfo("=================================================");
     log:printInfo("Press Ctrl+C to stop the server");
     

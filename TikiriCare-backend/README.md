@@ -1,13 +1,31 @@
-# TikiriCare Backend
+# TikiriCare & TikiriPiyasa Backend
 
-A comprehensive Ballerina backend service for the TikiriCare child health management application.
+A comprehensive Ballerina backend service that provides REST APIs for both TikiriCare (child healthcare management) and TikiriPiyasa (caregiver marketplace) applications.
 
 ## Features
 
+### TikiriCare APIs
 - **User Authentication**: JWT-based authentication with user registration and login
-- **Child Management**: Add, update, and manage children records
-- **Vaccine Tracking**: Automatic vaccine schedule generation based on Sri Lanka National Immunization Schedule
+- **Child Management**: Add, update, and manage children records  
+- **Vaccine Tracking**: Track vaccine schedules and completion status
 - **Health Monitoring**: Track growth records and medical history
+
+### TikiriPiyasa APIs
+- **Caregiver Management**: Registration and profile management for caregivers
+- **Care Request System**: Parents can request care services
+- **Marketplace**: Browse available caregivers and their services
+
+## Quick Start
+
+1. **Start the backend server:**
+   ```bash
+   cd TikiriCare-backend
+   bal run
+   ```
+
+2. **Server will start on:** `http://localhost:8080`
+
+3. **Health check:** `GET http://localhost:8080/health`
 - **Age Calculation**: Automatic age calculation based on birth date
 
 ## Project Structure

@@ -1,0 +1,12 @@
+[package]
+org = "tikiricare"
+name = "tikiricare_backend_min"
+version = "0.1.0"
+
+[build-options]
+observabilityIncluded = false
+
+[dependencies]
+"ballerina/http" = "^2.8.0"
+"ballerina/jwt" = "^2.8.0"
+"ballerina/time" = "^2.8.0"

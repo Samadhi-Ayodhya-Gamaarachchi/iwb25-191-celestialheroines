@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authAPI } from '@/services/api';
 
 interface User {
   id: string;
@@ -12,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: Omit<User, 'id'>) => Promise<boolean>;
+  register: (userData: Omit<User, 'id'>, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
@@ -52,20 +53,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       
-      // Simulate API call - replace with actual authentication logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call actual backend API
+      const response = await authAPI.login(email, password);
       
-      // Mock user data - replace with actual API response
-      const mockUser: User = {
-        id: '1',
-        name: 'Parent User',
-        email: email,
-        telephone: '+1234567890',
-      };
-      
-      await AsyncStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
-      return true;
+      if (response.token) {
+        // Store auth token
+        await AsyncStorage.setItem('auth_token', response.token);
+        
+        const userData: User = {
+          id: response.user.id || response.user.email,
+          name: response.user.name,
+          email: response.user.email,
+          telephone: response.user.telephone || '',
+        };
+        
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
       console.error('Login error:', error);
       return false;
@@ -74,21 +81,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (userData: Omit<User, 'id'>): Promise<boolean> => {
+  const register = async (userData: Omit<User, 'id'>, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       
-      // Simulate API call - replace with actual registration logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call actual backend API
+      const response = await authAPI.register(
+        userData.email, 
+        password,
+        userData.name, 
+        userData.telephone
+      );
       
-      const newUser: User = {
-        id: Date.now().toString(),
-        ...userData,
-      };
-      
-      await AsyncStorage.setItem('user', JSON.stringify(newUser));
-      setUser(newUser);
-      return true;
+      if (response.token) {
+        // Store auth token
+        await AsyncStorage.setItem('auth_token', response.token);
+        
+        const newUser: User = {
+          id: response.user.id || response.user.email,
+          name: response.user.name,
+          email: response.user.email,
+          telephone: response.user.telephone || '',
+        };
+        
+        await AsyncStorage.setItem('user', JSON.stringify(newUser));
+        setUser(newUser);
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
       console.error('Registration error:', error);
       return false;
@@ -100,6 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('auth_token');
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);

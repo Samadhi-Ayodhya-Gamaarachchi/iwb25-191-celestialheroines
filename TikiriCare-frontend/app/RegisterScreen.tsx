@@ -69,16 +69,16 @@ export default function RegisterScreen() {
         name: parentName,
         email,
         telephone,
-      });
+      }, password);
 
       if (success) {
         Alert.alert(
           "Success",
-          "Account created successfully! Please sign in.",
+          "Account created successfully! Welcome to TikiriCare!",
           [
             {
               text: "OK",
-              onPress: () => router.replace("/LoginScreen" as any),
+              onPress: () => router.replace("/(tabs)"),
             },
           ]
         );
@@ -93,7 +93,7 @@ export default function RegisterScreen() {
   };
 
   const handleLogin = () => {
-    router.push("/LoginScreen" as any);
+    router.push("/LoginScreen");
   };
 
   return (

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikiriCare Backend-Frontend Integration Test</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #007bff;
+        }
+        .test-section h2 {
+            color: #007bff;
+            margin-top: 0;
+        }
+        button {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        .status {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #cce7f0;
+            color: #055160;
+            border: 1px solid #b8daff;
+        }
+        .results {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        }
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🩺 TikiriCare Integration Test Dashboard</h1>
+        
+        <div class="test-section">
+            <h2><span class="emoji">🔍</span>Backend Health Check</h2>
+            <button onclick="testHealth()">Test Backend Health</button>
+            <div id="healthStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2><span class="emoji">🔐</span>Authentication System</h2>
+            <button onclick="testLogin()">Test Login (parent@test.com)</button>
+            <button onclick="testRegister()">Test New User Registration</button>
+            <div id="authStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2><span class="emoji">👶</span>Children Management</h2>
+            <button onclick="testGetChildren()">Get Children (requires login)</button>
+            <button onclick="testAddChild()">Add New Child</button>
+            <div id="childrenStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2><span class="emoji">📊</span>Growth Records</h2>
+            <button onclick="testAddGrowthRecord()">Add Growth Record</button>
+            <button onclick="testGetGrowthRecords()">Get Growth Records</button>
+            <div id="growthStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2><span class="emoji">👩‍⚕️</span>Caregiver Services (TikiriPiyasa)</h2>
+            <button onclick="testGetCaregivers()">Get Available Caregivers</button>
+            <button onclick="testRegisterCaregiver()">Register New Caregiver</button>
+            <div id="caregiverStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2><span class="emoji">🗃️</span>Database Integration Status</h2>
+            <div class="info">
+                <strong>MongoDB Atlas Connection:</strong> mongodb+srv://user01:celestial4@ballerinaproject.fdijaa6.mongodb.net/<br>
+                <strong>Database:</strong> tikiricare<br>
+                <strong>Collections:</strong> users, children, growth_records, caregivers<br>
+                <strong>Status:</strong> Ready for data persistence
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        let authToken = null;
+        let currentUserId = null;
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showResults(elementId, data) {
+            const element = document.getElementById(elementId);
+            const existing = element.querySelector('.status');
+            if (existing) {
+                element.innerHTML = existing.outerHTML + `<div class="results"><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+            }
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+                
+                if (authToken) {
+                    headers.Authorization = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers
+                });
+
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testHealth() {
+            showStatus('healthStatus', '🔄 Testing backend health...', 'info');
+            
+            const result = await apiCall('/health');
+            
+            if (result.success) {
+                showStatus('healthStatus', '✅ Backend is healthy and running!', 'success');
+                showResults('healthStatus', result.data);
+            } else {
+                showStatus('healthStatus', `❌ Backend health check failed: ${result.error || 'Unknown error'}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            showStatus('authStatus', '🔄 Testing login with sample credentials...', 'info');
+            
+            const result = await apiCall('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: 'parent@test.com',
+                    password: 'password123'
+                })
+            });
+            
+            if (result.success && result.data.token) {
+                authToken = result.data.token;
+                currentUserId = result.data.user.id;
+                showStatus('authStatus', '✅ Login successful! Token received and stored.', 'success');
+                showResults('authStatus', result.data);
+            } else {
+                showStatus('authStatus', `❌ Login failed: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testRegister() {
+            showStatus('authStatus', '🔄 Testing new user registration...', 'info');
+            
+            const randomId = Math.floor(Math.random() * 10000);
+            const result = await apiCall('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: `testuser${randomId}@tikiricare.com`,
+                    password: 'testpassword123',
+                    name: `Test Parent ${randomId}`,
+                    telephone: '+94701234567',
+                    role: 'parent'
+                })
+            });
+            
+            if (result.success) {
+                showStatus('authStatus', '✅ Registration successful! New user created.', 'success');
+                showResults('authStatus', result.data);
+            } else {
+                showStatus('authStatus', `❌ Registration failed: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testGetChildren() {
+            if (!authToken) {
+                showStatus('childrenStatus', '⚠️ Please login first to test children management', 'error');
+                return;
+            }
+
+            showStatus('childrenStatus', '🔄 Fetching children for authenticated user...', 'info');
+            
+            const result = await apiCall('/children');
+            
+            if (result.success) {
+                showStatus('childrenStatus', `✅ Children fetched successfully! Found ${result.data.children?.length || 0} children.`, 'success');
+                showResults('childrenStatus', result.data);
+            } else {
+                showStatus('childrenStatus', `❌ Failed to fetch children: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testAddChild() {
+            if (!authToken) {
+                showStatus('childrenStatus', '⚠️ Please login first to add children', 'error');
+                return;
+            }
+
+            showStatus('childrenStatus', '🔄 Adding new child...', 'info');
+            
+            const result = await apiCall('/children', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: 'Test Child',
+                    gender: 'male',
+                    dateOfBirth: '2022-01-15',
+                    height: 85,
+                    weight: 12.5
+                })
+            });
+            
+            if (result.success) {
+                showStatus('childrenStatus', '✅ Child added successfully!', 'success');
+                showResults('childrenStatus', result.data);
+            } else {
+                showStatus('childrenStatus', `❌ Failed to add child: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testAddGrowthRecord() {
+            showStatus('growthStatus', '🔄 Adding growth record...', 'info');
+            
+            const result = await apiCall('/children/test-child-id/growth', {
+                method: 'POST',
+                body: JSON.stringify({
+                    height: 87.5,
+                    weight: 13.2,
+                    recordedDate: new Date().toISOString().split('T')[0]
+                })
+            });
+            
+            if (result.success) {
+                showStatus('growthStatus', '✅ Growth record added successfully!', 'success');
+                showResults('growthStatus', result.data);
+            } else {
+                showStatus('growthStatus', `❌ Failed to add growth record: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testGetGrowthRecords() {
+            showStatus('growthStatus', '🔄 Fetching growth records...', 'info');
+            
+            const result = await apiCall('/children/test-child-id/growth');
+            
+            if (result.success) {
+                showStatus('growthStatus', '✅ Growth records fetched successfully!', 'success');
+                showResults('growthStatus', result.data);
+            } else {
+                showStatus('growthStatus', `❌ Failed to fetch growth records: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testGetCaregivers() {
+            showStatus('caregiverStatus', '🔄 Fetching available caregivers...', 'info');
+            
+            const result = await apiCall('/caregivers');
+            
+            if (result.success) {
+                showStatus('caregiverStatus', `✅ Caregivers fetched successfully! Found ${result.data.caregivers?.length || 0} caregivers.`, 'success');
+                showResults('caregiverStatus', result.data);
+            } else {
+                showStatus('caregiverStatus', `❌ Failed to fetch caregivers: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        async function testRegisterCaregiver() {
+            showStatus('caregiverStatus', '🔄 Registering new caregiver...', 'info');
+            
+            const randomId = Math.floor(Math.random() * 1000);
+            const result = await apiCall('/caregivers/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: `Dr. Test Caregiver ${randomId}`,
+                    specialization: 'Pediatrics',
+                    experience: '5 years',
+                    location: 'Colombo',
+                    contactNumber: '+94701234567',
+                    services: ['Health Checkups', 'Vaccination', 'Growth Monitoring']
+                })
+            });
+            
+            if (result.success) {
+                showStatus('caregiverStatus', '✅ Caregiver registered successfully!', 'success');
+                showResults('caregiverStatus', result.data);
+            } else {
+                showStatus('caregiverStatus', `❌ Failed to register caregiver: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+
+        // Auto-test health on page load
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html>
