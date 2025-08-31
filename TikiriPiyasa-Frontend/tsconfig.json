@@ -4,9 +4,12 @@
     "strict": true,
     "jsx": "react-jsx",
 
-    "baseUrl": ".",
+    "baseUrl": "src",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["src/*"],
+      "@navigation/*": ["navigation/*"],
+      "@screens/*": ["screens/*"],
+      "@layouts/*": ["layouts/*"]
     }
   }
 }

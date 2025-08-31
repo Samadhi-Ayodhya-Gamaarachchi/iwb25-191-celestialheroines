@@ -1,10 +1,9 @@
-import { Text, View } from 'react-native';
-import "../global.css"
+// app/index.tsx (Entry point)
+import "../global.css";
+import { Redirect } from 'expo-router';
 
-export default function App() {
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-5xl font-bold">Hello NativeWind!</Text>
-    </View>
-  );
+export default function Index() {
+  // This will redirect to the appropriate screen based on auth state
+  // The actual logic is handled in _layout.tsx
+  return <Redirect href="/LoginScreen" />;
 }

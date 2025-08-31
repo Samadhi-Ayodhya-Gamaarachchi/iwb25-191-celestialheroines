@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikiriCare & TikiriPiyasa Backend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        input { width: 200px; padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .status { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 TikiriCare & TikiriPiyasa Integration Test</h1>
+        
+        <div class="test-section info">
+            <h3>🏥 Backend Status</h3>
+            <p><span class="status">URL:</span> http://localhost:8080</p>
+            <p><span class="status">Status:</span> <span id="backend-status">Testing...</span></p>
+            <button onclick="testBackendHealth()">Test Health Endpoint</button>
+            <pre id="health-result"></pre>
+        </div>
+
+        <div class="test-section">
+            <h3>🔐 Authentication Test</h3>
+            <div>
+                <input type="email" id="email" placeholder="Email" value="parent@test.com">
+                <input type="password" id="password" placeholder="Password" value="password123">
+                <button onclick="testLogin()">Test Login</button>
+                <button onclick="testRegister()">Test Register</button>
+            </div>
+            <pre id="auth-result"></pre>
+        </div>
+
+        <div class="test-section">
+            <h3>👶 Children Management Test</h3>
+            <div>
+                <input type="text" id="child-name" placeholder="Child Name" value="Test Child">
+                <input type="text" id="child-gender" placeholder="Gender" value="male">
+                <input type="date" id="child-dob" value="2020-01-15">
+                <button onclick="testAddChild()">Add Child</button>
+                <button onclick="testGetChildren()">Get Children</button>
+            </div>
+            <pre id="children-result"></pre>
+        </div>
+
+        <div class="test-section">
+            <h3>👩‍⚕️ Caregiver Test (TikiriPiyasa)</h3>
+            <div>
+                <button onclick="testGetCaregivers()">Get Caregivers</button>
+                <button onclick="testRegisterCaregiver()">Register Caregiver</button>
+            </div>
+            <pre id="caregiver-result"></pre>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Growth Records Test</h3>
+            <div>
+                <input type="number" id="height" placeholder="Height (cm)" value="95.5">
+                <input type="number" id="weight" placeholder="Weight (kg)" value="14.2">
+                <button onclick="testAddGrowthRecord()">Add Growth Record</button>
+            </div>
+            <pre id="growth-result"></pre>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let currentChildId = null;
+        
+        const API_BASE = 'http://localhost:8080';
+
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+                
+                if (authToken) {
+                    headers.Authorization = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers
+                });
+
+                const data = await response.json();
+                return { status: response.status, data };
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        async function testBackendHealth() {
+            const result = await apiCall('/health');
+            document.getElementById('health-result').textContent = JSON.stringify(result, null, 2);
+            
+            if (result.data && result.data.success) {
+                document.getElementById('backend-status').textContent = '✅ Running';
+                document.getElementById('backend-status').parentElement.parentElement.className = 'test-section success';
+            } else {
+                document.getElementById('backend-status').textContent = '❌ Error';
+                document.getElementById('backend-status').parentElement.parentElement.className = 'test-section error';
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const result = await apiCall('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+            
+            document.getElementById('auth-result').textContent = JSON.stringify(result, null, 2);
+            
+            if (result.data && result.data.success) {
+                authToken = result.data.data.token;
+                document.getElementById('auth-result').parentElement.className = 'test-section success';
+            } else {
+                document.getElementById('auth-result').parentElement.className = 'test-section error';
+            }
+        }
+
+        async function testRegister() {
+            const result = await apiCall('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: 'test@example.com',
+                    password: 'testpass123',
+                    name: 'Test User',
+                    telephone: '+94701234567',
+                    role: 'parent'
+                })
+            });
+            
+            document.getElementById('auth-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testGetChildren() {
+            const result = await apiCall('/children');
+            document.getElementById('children-result').textContent = JSON.stringify(result, null, 2);
+            
+            if (result.data && result.data.success && result.data.data.length > 0) {
+                currentChildId = result.data.data[0].id;
+            }
+        }
+
+        async function testAddChild() {
+            const name = document.getElementById('child-name').value;
+            const gender = document.getElementById('child-gender').value;
+            const dateOfBirth = document.getElementById('child-dob').value;
+            
+            const result = await apiCall('/children', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    gender,
+                    dateOfBirth,
+                    height: 95.5,
+                    weight: 14.2
+                })
+            });
+            
+            document.getElementById('children-result').textContent = JSON.stringify(result, null, 2);
+            
+            if (result.data && result.data.success) {
+                currentChildId = result.data.data.id;
+                document.getElementById('children-result').parentElement.className = 'test-section success';
+            }
+        }
+
+        async function testGetCaregivers() {
+            const result = await apiCall('/caregivers');
+            document.getElementById('caregiver-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testRegisterCaregiver() {
+            const result = await apiCall('/caregivers/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: 'Dr. Sarah Johnson',
+                    specialization: 'Pediatric Nurse',
+                    experience: '5 years',
+                    location: 'Colombo',
+                    contactNumber: '+94701234567',
+                    services: ['Child Care', 'Health Monitoring', 'Emergency Care']
+                })
+            });
+            
+            document.getElementById('caregiver-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testAddGrowthRecord() {
+            if (!currentChildId) {
+                document.getElementById('growth-result').textContent = 'Please add a child first or login to get existing children';
+                return;
+            }
+            
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            const result = await apiCall(`/children/${currentChildId}/growth`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    height,
+                    weight,
+                    recordedDate: new Date().toISOString().split('T')[0]
+                })
+            });
+            
+            document.getElementById('growth-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        // Auto-test backend health on page load
+        window.onload = function() {
+            testBackendHealth();
+        };
+    </script>
+</body>
+</html>
