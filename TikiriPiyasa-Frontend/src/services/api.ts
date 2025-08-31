@@ -1,5 +1,5 @@
 // API configuration and service functions for TikiriPiyasa
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://192.168.26.43:8080';
 
 // Helper function to get auth token
 export const getAuthToken = async () => {

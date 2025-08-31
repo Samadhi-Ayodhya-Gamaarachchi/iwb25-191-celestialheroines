@@ -1,671 +1,320 @@
-import { RootStackParamList } from '@navigation/types';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
 
-
-interface RegistationProps {
-  title: string;
-  path: string;
-  onComplete: () => void; // Add this prop
+interface RegistrationScreenProps {
+  onNavigateToLogin: () => void;
 }
 
-interface CenterProfile {
-  // Basic Details
-  centerName: string;
-  registrationNumber: string;
-  centerType: string;
-  
-  // Location Details
-  address: string;
-  city: string;
-  postalCode: string;
-  
-  // Contact Information
-  mobileNumber: string;
-  landlineNumber: string;
-  email: string;
-  website: string;
-  socialMediaLinks: string;
-  
-  // Operational Details
-  weekdayHours: string;
-  weekendHours: string;
-  ageGroups: string;
-  maxCapacity: string;
-  staffCount: string;
-  
-  // Facilities & Services
-  hasIndoorPlayArea: boolean;
-  hasOutdoorPlayArea: boolean;
-  providesMeals: boolean;
-  specialPrograms: string;
-  hasMedicalAid: boolean;
-  hasCCTV: boolean;
-  
-  // Additional Features
-  certifications: string;
-  paymentMethods: string;
-  feeStructure: string;
-}
-
-const Registation: React.FC<RegistationProps> = ({ title, path, onComplete }) => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [profile, setProfile] = useState<CenterProfile>({
-    centerName: '',
-    registrationNumber: '',
-    centerType: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    mobileNumber: '',
-    landlineNumber: '',
+const RegistrationScreen: React.FC<RegistrationScreenProps> = ({ onNavigateToLogin }) => {
+  const [formData, setFormData] = useState({
+    name: '',
     email: '',
-    website: '',
-    socialMediaLinks: '',
-    weekdayHours: '',
-    weekendHours: '',
-    ageGroups: '',
-    maxCapacity: '',
-    staffCount: '',
-    hasIndoorPlayArea: false,
-    hasOutdoorPlayArea: false,
-    providesMeals: false,
-    specialPrograms: '',
-    hasMedicalAid: false,
-    hasCCTV: false,
-    certifications: '',
-    paymentMethods: '',
-    feeStructure: ''
+    telephone: '',
+    password: '',
+    confirmPassword: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const { register } = useAuth();
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
-
-  const updateProfile = (field: keyof CenterProfile, value: string | boolean) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleNext = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+  const validateForm = () => {
+    const { name, email, password, confirmPassword } = formData;
+        
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return false;
     }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return false;
     }
-  };
-
-  const handleSubmit = () => {
-    // Validate required fields
-    if (!profile.centerName || !profile.email || !profile.mobileNumber) {
-      Alert.alert('Oops! 🌸', 'Please fill in all required fields (Center Name, Email, Mobile Number)', 
-        [{ text: 'OK', style: 'default' }]);
-      return;
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return false;
     }
-    
-    Alert.alert('Success! 🎉', 'Care Center Profile Created Successfully!', 
-      [{ text: 'Great!', style: 'default' }]);
-    console.log('Profile Data:', profile);
+    return true;
   };
 
-  const getStepIcon = (step: number) => {
-    const icons = ['🏠', '📍', '📞', '⏰', '🎨', '✨'];
-    return icons[step - 1] || '📝';
-  };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.stepHeader}>
-              <Text style={styles.stepIcon}>{getStepIcon(1)}</Text>
-              <Text style={styles.stepTitle}>Basic Details</Text>
-              <Text style={styles.stepSubtitle}>Tell us about your care center</Text>
-            </View>
+  const handleRegister = async () => {
+    if (!validateForm()) return;
+    setIsLoading(true);
+    try {
+      const success = await register(
+        formData.email.trim(),
+        formData.password,
+        formData.name.trim(),
+        formData.telephone.trim() || undefined
+      );
             
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Care Center Name *</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.centerName}
-                onChangeText={(text) => updateProfile('centerName', text)}
-                placeholder="Enter your care center name"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Registration Number</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.registrationNumber}
-                onChangeText={(text) => updateProfile('registrationNumber', text)}
-                placeholder="Enter registration number (if available)"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Type of Care Center</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.centerType}
-                onChangeText={(text) => updateProfile('centerType', text)}
-                placeholder="e.g., Daycare, Preschool, After-school care"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-          </View>
-        );
-
-      case 2:
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.stepHeader}>
-              <Text style={styles.stepIcon}>{getStepIcon(2)}</Text>
-              <Text style={styles.stepTitle}>Location Details</Text>
-              <Text style={styles.stepSubtitle}>Where can families find you?</Text>
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Address</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={profile.address}
-                onChangeText={(text) => updateProfile('address', text)}
-                placeholder="Enter your full address"
-                placeholderTextColor="#A0A0A0"
-                multiline
-                numberOfLines={3}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>City/Region</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.city}
-                onChangeText={(text) => updateProfile('city', text)}
-                placeholder="Enter city or region"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Pin/Postal Code</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.postalCode}
-                onChangeText={(text) => updateProfile('postalCode', text)}
-                placeholder="Enter postal code"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-          </View>
-        );
-
-      case 3:
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.stepHeader}>
-              <Text style={styles.stepIcon}>{getStepIcon(3)}</Text>
-              <Text style={styles.stepTitle}>Contact Information</Text>
-              <Text style={styles.stepSubtitle}>How can parents reach you?</Text>
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Mobile Number *</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.mobileNumber}
-                onChangeText={(text) => updateProfile('mobileNumber', text)}
-                placeholder="Enter mobile number"
-                placeholderTextColor="#A0A0A0"
-                keyboardType="phone-pad"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Landline Number</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.landlineNumber}
-                onChangeText={(text) => updateProfile('landlineNumber', text)}
-                placeholder="Enter landline number"
-                placeholderTextColor="#A0A0A0"
-                keyboardType="phone-pad"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email Address *</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.email}
-                onChangeText={(text) => updateProfile('email', text)}
-                placeholder="Enter email address"
-                placeholderTextColor="#A0A0A0"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Website</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.website}
-                onChangeText={(text) => updateProfile('website', text)}
-                placeholder="Enter website URL (optional)"
-                placeholderTextColor="#A0A0A0"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Social Media Links</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.socialMediaLinks}
-                onChangeText={(text) => updateProfile('socialMediaLinks', text)}
-                placeholder="Facebook, Instagram links (optional)"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-          </View>
-        );
-
-      case 4:
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.stepHeader}>
-              <Text style={styles.stepIcon}>{getStepIcon(4)}</Text>
-              <Text style={styles.stepTitle}>Operational Details</Text>
-              <Text style={styles.stepSubtitle}>When are you open for care?</Text>
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Weekday Hours</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.weekdayHours}
-                onChangeText={(text) => updateProfile('weekdayHours', text)}
-                placeholder="e.g., 8:00 AM - 6:00 PM"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Weekend Hours</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.weekendHours}
-                onChangeText={(text) => updateProfile('weekendHours', text)}
-                placeholder="e.g., 9:00 AM - 4:00 PM or Closed"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Age Groups Accepted</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.ageGroups}
-                onChangeText={(text) => updateProfile('ageGroups', text)}
-                placeholder="e.g., 6 months - 5 years"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Maximum Child Capacity</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.maxCapacity}
-                onChangeText={(text) => updateProfile('maxCapacity', text)}
-                placeholder="Enter maximum number of children"
-                placeholderTextColor="#A0A0A0"
-                keyboardType="numeric"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Number of Staff Members</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.staffCount}
-                onChangeText={(text) => updateProfile('staffCount', text)}
-                placeholder="Enter number of staff/teachers"
-                placeholderTextColor="#A0A0A0"
-                keyboardType="numeric"
-              />
-            </View>
-          </View>
-        );
-
-      case 5:
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.stepHeader}>
-              <Text style={styles.stepIcon}>{getStepIcon(5)}</Text>
-              <Text style={styles.stepTitle}>Facilities & Services</Text>
-              <Text style={styles.stepSubtitle}>What makes your center special?</Text>
-            </View>
-            
-            <View style={styles.facilitiesGrid}>
-              <View style={styles.facilityCard}>
-                <Text style={styles.facilityIcon}>🏠</Text>
-                <Text style={styles.facilityLabel}>Indoor Play Area</Text>
-                <Switch
-                  value={profile.hasIndoorPlayArea}
-                  onValueChange={(value) => updateProfile('hasIndoorPlayArea', value)}
-                  trackColor={{ false: '#E8E8E8', true: '#CFF4D2' }}
-                  thumbColor={profile.hasIndoorPlayArea ? '#4CAF50' : '#f4f3f4'}
-                />
-              </View>
-
-              <View style={styles.facilityCard}>
-                <Text style={styles.facilityIcon}>🌳</Text>
-                <Text style={styles.facilityLabel}>Outdoor Play Area</Text>
-                <Switch
-                  value={profile.hasOutdoorPlayArea}
-                  onValueChange={(value) => updateProfile('hasOutdoorPlayArea', value)}
-                  trackColor={{ false: '#E8E8E8', true: '#CFF4D2' }}
-                  thumbColor={profile.hasOutdoorPlayArea ? '#4CAF50' : '#f4f3f4'}
-                />
-              </View>
-
-              <View style={styles.facilityCard}>
-                <Text style={styles.facilityIcon}>🍽️</Text>
-                <Text style={styles.facilityLabel}>Meals Provided</Text>
-                <Switch
-                  value={profile.providesMeals}
-                  onValueChange={(value) => updateProfile('providesMeals', value)}
-                  trackColor={{ false: '#E8E8E8', true: '#CFF4D2' }}
-                  thumbColor={profile.providesMeals ? '#4CAF50' : '#f4f3f4'}
-                />
-              </View>
-
-              <View style={styles.facilityCard}>
-                <Text style={styles.facilityIcon}>🏥</Text>
-                <Text style={styles.facilityLabel}>Medical/First-Aid</Text>
-                <Switch
-                  value={profile.hasMedicalAid}
-                  onValueChange={(value) => updateProfile('hasMedicalAid', value)}
-                  trackColor={{ false: '#E8E8E8', true: '#CFF4D2' }}
-                  thumbColor={profile.hasMedicalAid ? '#4CAF50' : '#f4f3f4'}
-                />
-              </View>
-
-              <View style={styles.facilityCard}>
-                <Text style={styles.facilityIcon}>📹</Text>
-                <Text style={styles.facilityLabel}>CCTV Monitoring</Text>
-                <Switch
-                  value={profile.hasCCTV}
-                  onValueChange={(value) => updateProfile('hasCCTV', value)}
-                  trackColor={{ false: '#E8E8E8', true: '#CFF4D2' }}
-                  thumbColor={profile.hasCCTV ? '#4CAF50' : '#f4f3f4'}
-                />
-              </View>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Special Programs</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={profile.specialPrograms}
-                onChangeText={(text) => updateProfile('specialPrograms', text)}
-                placeholder="e.g., Music, Art, Language, Sports, STEM activities"
-                placeholderTextColor="#A0A0A0"
-                multiline
-                numberOfLines={3}
-              />
-            </View>
-          </View>
-        );
-
-      case 6:
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.stepHeader}>
-              <Text style={styles.stepIcon}>{getStepIcon(6)}</Text>
-              <Text style={styles.stepTitle}>Additional Features</Text>
-              <Text style={styles.stepSubtitle}>Final touches for your profile</Text>
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Safety & Certifications</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={profile.certifications}
-                onChangeText={(text) => updateProfile('certifications', text)}
-                placeholder="Health inspections, licenses, safety certifications"
-                placeholderTextColor="#A0A0A0"
-                multiline
-                numberOfLines={3}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Payment Methods Accepted</Text>
-              <TextInput
-                style={styles.input}
-                value={profile.paymentMethods}
-                onChangeText={(text) => updateProfile('paymentMethods', text)}
-                placeholder="Cash, Bank Transfer, Card, Digital Wallets"
-                placeholderTextColor="#A0A0A0"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Fee Structure</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={profile.feeStructure}
-                onChangeText={(text) => updateProfile('feeStructure', text)}
-                placeholder="Monthly/Weekly/Daily rates (optional)"
-                placeholderTextColor="#A0A0A0"
-                multiline
-                numberOfLines={3}
-              />
-            </View>
-
-            <View style={styles.uploadSection}>
-              <Text style={styles.label}>📷 Visual Media</Text>
-              <TouchableOpacity style={styles.uploadButton}>
-                <Text style={styles.uploadIcon}>🏢</Text>
-                <Text style={styles.uploadButtonText}>Upload Center Logo</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.uploadButton}>
-                <Text style={styles.uploadIcon}>📸</Text>
-                <Text style={styles.uploadButtonText}>Upload Photos</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.uploadButton}>
-                <Text style={styles.uploadIcon}>🎬</Text>
-                <Text style={styles.uploadButtonText}>Upload Video (Optional)</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        );
-
-      default:
-        return null;
+      if (!success) {
+        Alert.alert('Error', 'Registration failed. Please try again.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>🌸 Tikiri Care Center</Text>
-          <Text style={styles.titleSubtext}>Profile Setup</Text>
-          <View style={styles.stepIndicator}>
-            <Text style={styles.stepText}>Step {currentStep} of {totalSteps}</Text>
-          </View>
-          {/* Add this button */}
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: '#CFF4D2', marginTop: 12 }]}
-            onPress={() => {
-              onComplete?.();
-              navigation.navigate('Home');
-            }}
-          >
-            <Text style={{ color: '#333', fontWeight: 'bold' }}>Go to Home</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progress, { width: `${(currentStep / totalSteps) * 100}%` }]} />
-          </View>
-          <View style={styles.progressDots}>
-            {Array.from({ length: totalSteps }, (_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.progressDot,
-                  index + 1 <= currentStep ? styles.activeDot : styles.inactiveDot
-                ]}
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Header with gradient background */}
+        <View style={styles.headerContainer}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoBackground}>
+              <Image 
+                source={require('../asset/Tikiri_piyasa.png')}
+                style={styles.logo}
+               
               />
-            ))}
+            </View>
+            <Text style={styles.appTitle}>TikiriPiyasa</Text>
+            <Text style={styles.subtitle}>Join as a Childcare Provider</Text>
+           
           </View>
         </View>
 
-        {renderStepContent()}
+        {/* Form Container */}
+        <View style={styles.formContainer}>
+        
 
-        <View style={styles.buttonContainer}>
-          {currentStep > 1 && (
-            <TouchableOpacity style={[styles.button, styles.previousButton]} onPress={handlePrevious}>
-              <Text style={styles.buttonText}>← Previous</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Full Name *</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your full name"
+                placeholderTextColor="#B794C7"
+                value={formData.name}
+                onChangeText={(value) => handleInputChange('name', value)}
+                autoCapitalize="words"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Email *</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#B794C7"
+                value={formData.email}
+                onChangeText={(value) => handleInputChange('email', value)}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Phone Number</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your phone number"
+                placeholderTextColor="#B794C7"
+                value={formData.telephone}
+                onChangeText={(value) => handleInputChange('telephone', value)}
+                keyboardType="phone-pad"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password *</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Create a password (min 6 characters)"
+                placeholderTextColor="#B794C7"
+                value={formData.password}
+                onChangeText={(value) => handleInputChange('password', value)}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Confirm Password *</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm your password"
+                placeholderTextColor="#B794C7"
+                value={formData.confirmPassword}
+                onChangeText={(value) => handleInputChange('confirmPassword', value)}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={[styles.registerButton, isLoading && styles.buttonDisabled]}
+            onPress={handleRegister}
+            disabled={isLoading}
+          >
+            <Text style={styles.registerButtonText}>
+              {isLoading ? 'Creating Account...' : 'Create Account'}
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={onNavigateToLogin}>
+              <Text style={styles.loginLink}>Sign In</Text>
             </TouchableOpacity>
-          )}
-          
-          {currentStep < totalSteps ? (
-            <TouchableOpacity style={[styles.button, styles.nextButton]} onPress={handleNext}>
-              <Text style={styles.buttonText}>Next →</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={[styles.button, styles.submitButton]} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>🎉 Complete Profile</Text>
-            </TouchableOpacity>
-          )}
+          </View>
+        </View>
+
+        {/* Bottom decorative elements */}
+        <View style={styles.bottomDecorations}>
+          <Text style={styles.bottomEmoji}>🦋</Text>
+          <Text style={styles.bottomEmoji}>✨</Text>
+          <Text style={styles.bottomEmoji}>🌺</Text>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDDDE6', // Blush Pink background
+    backgroundColor: '#ca9dbc', // Soft purple background matching logo
   },
-  header: {
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  headerContainer: {
     alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 30,
-    backgroundColor: '#FFFFFF', // Cloud White
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    paddingVertical: 40,
+    
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF69B4',
-    marginBottom: 5,
+  logoContainer: {
+    alignItems: 'center',
+    position: 'relative',
   },
-  titleSubtext: {
-    fontSize: 18,
-    color: '#666',
-    fontWeight: '600',
-  },
-  stepIndicator: {
-    backgroundColor: '#B8E0F4', // Baby Blue
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 15,
-  },
-  stepText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2196F3',
-  },
-  progressContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#F5E6DC', // Warm Beige
-    borderRadius: 3,
-    marginBottom: 15,
-  },
-  progress: {
-    height: '100%',
-    backgroundColor: '#CFF4D2', // Pastel Green
-    borderRadius: 3,
-  },
-  progressDots: {
-    flexDirection: 'row',
+  logoBackground: {
+    width: 120,
+    height: 120,
+   
     justifyContent: 'center',
     alignItems: 'center',
+   
+    shadowColor: '#9B59B6',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    
   },
-  progressDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginHorizontal: 4,
+  logo: {
+    width: 100,
+    height: 100,
   },
-  activeDot: {
-    backgroundColor: '#4CAF50',
+  appTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#7B2D7B', // Deep purple from logo
+
+    letterSpacing: 1.2,
+    textShadowColor: 'rgba(123, 45, 123, 0.1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
-  inactiveDot: {
-    backgroundColor: '#E8E8E8',
-  },
-  stepContainer: {
-    backgroundColor: '#FFFFFF', // Cloud White
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 25,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  stepHeader: {
-    alignItems: 'center',
-    marginBottom: 25,
-  },
-  stepIcon: {
-    fontSize: 40,
-    marginBottom: 10,
-  },
-  stepTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  stepSubtitle: {
+  subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#A569BD', // Medium purple
     textAlign: 'center',
-    fontStyle: 'italic',
+    fontWeight: '600',
+    marginBottom: 20,
+  },
+  decorativeElements: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+  },
+  heart1: {
+    position: 'absolute',
+    top: -10,
+    right: 20,
+    fontSize: 20,
+    transform: [{ rotate: '15deg' }],
+  },
+  flower1: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    fontSize: 18,
+    transform: [{ rotate: '-10deg' }],
+  },
+  heart2: {
+    position: 'absolute',
+    bottom: 10,
+    right: 0,
+    fontSize: 16,
+    transform: [{ rotate: '25deg' }],
+  },
+  formContainer: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    padding: 30,
+    marginHorizontal: 5,
+    shadowColor: '#9B59B6',
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#F4E4F4',
+  },
+  welcomeSection: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  welcomeText: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#7B2D7B',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  registerText: {
+    fontSize: 15,
+    color: '#A569BD',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   inputContainer: {
     marginBottom: 20,
@@ -673,104 +322,82 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#7B2D7B',
     marginBottom: 8,
+  },
+  inputWrapper: {
+    borderWidth: 2,
+    borderColor: '#E8D5E8',
+    borderRadius: 18,
+    backgroundColor: '#FDFBFD',
+    shadowColor: '#9B59B6',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
   input: {
-    borderWidth: 2,
-    borderColor: '#F5E6DC', // Warm Beige
-    borderRadius: 12,
-    padding: 15,
+    padding: 16,
     fontSize: 16,
-    backgroundColor: '#FFFFFF',
-    color: '#333',
+    color: '#7B2D7B',
+    fontWeight: '500',
   },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  facilitiesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  facilityCard: {
-    width: '48%',
-    backgroundColor: '#F5E6DC', // Warm Beige
-    borderRadius: 15,
-    padding: 15,
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  facilityIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  facilityLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  uploadSection: {
-    marginTop: 20,
-  },
-  uploadButton: {
-    backgroundColor: '#B8E0F4', // Baby Blue
-    borderColor: '#2196F3',
-    borderWidth: 2,
-    borderRadius: 15,
+  registerButton: {
+    backgroundColor: '#9B59B6', // Purple from logo
+    borderRadius: 18,
     padding: 18,
-    flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 15,
+    marginBottom: 25,
+    shadowColor: '#9B59B6',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  buttonDisabled: {
+    backgroundColor: '#D5BFD5',
+    shadowOpacity: 0.1,
+  },
+  registerButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  loginContainer: {
+    flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: 8,
-  },
-  uploadIcon: {
-    fontSize: 20,
-    marginRight: 10,
-  },
-  uploadButtonText: {
-    color: '#2196F3',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 40,
-  },
-  button: {
-    flex: 1,
-    padding: 18,
-    borderRadius: 15,
     alignItems: 'center',
-    marginHorizontal: 5,
+    paddingTop: 10,
   },
-  previousButton: {
-    backgroundColor: '#F5E6DC', // Warm Beige
-    borderWidth: 2,
-    borderColor: '#D4C4B0',
+  loginText: {
+    fontSize: 15,
+    color: '#A569BD',
+    fontWeight: '500',
   },
-  nextButton: {
-    backgroundColor: '#B8E0F4', // Baby Blue
-    borderWidth: 2,
-    borderColor: '#2196F3',
+  loginLink: {
+    fontSize: 15,
+    color: '#7B2D7B',
+    fontWeight: '700',
   },
-  submitButton: {
-    backgroundColor: '#CFF4D2', // Pastel Green
-    borderWidth: 2,
-    borderColor: '#4CAF50',
+  bottomDecorations: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    gap: 15,
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+  bottomEmoji: {
+    fontSize: 18,
+    opacity: 0.7,
   },
 });
 
-export default Registation;
+export default RegistrationScreen;
